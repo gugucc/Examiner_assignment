@@ -1,0 +1,136 @@
+{
+  "clearInfo": {
+    "clearUrl": "api/clear.json"
+  },
+  "homeInfo": {
+    "title": "首页",
+    "icon": "fa fa-home",
+    "href": "page/welcome?mpi=m-p-i-0"
+  },
+  "logoInfo": {
+    "title": "考官分配系统",
+    "image": "images/logo.png",
+    "href": ""
+  },
+  "menuInfo": {
+    "currency": {
+      "title": "全局管理",
+      "icon": "fa fa-address-book",
+      "child": [
+        {
+          "title": "基础数据管理",
+          "href": "",
+          "icon": "fa fa-home",
+          "target": "_self",
+          "child": [
+            {
+              "title": "学段管理",
+              "href": "page/examType/list",
+              "icon": "fa fa-tachometer",
+              "target": "_self"
+            },
+            {
+                  "title": "学科管理",
+                  "href": "page/studySubject/list",
+                  "icon": "fa fa-tachometer",
+                  "target": "_self"
+            },
+            {
+              "title": "考官评价项目管理",
+              "href": "page/confirmResult/list",
+              "icon": "fa fa-tachometer",
+              "target": "_self"
+            },
+            {
+              "title": "区县管理",
+              "href": "page/district/list",
+              "icon": "fa fa-tachometer",
+              "target": "_self"
+            },
+            {
+              "title": "考点管理",
+              "href": "page/examSite/list",
+              "icon": "fa fa-tachometer",
+              "target": "_self"
+            },
+            {
+              "title": "考官管理",
+              "href": "page/examiner/list",
+              "icon": "fa fa-tachometer",
+              "target": "_self"
+            }
+          ]
+        },
+        {
+          "title": "考务管理",
+          "href": "",
+          "icon": "fa fa-snowflake-o",
+          "target": "",
+          "child": [
+            {
+              "title": "考试管理",
+              "href": "page/teachingManagement/list",
+              "icon": "fa fa-snowflake-o",
+              "target": "_self"
+            },
+            {
+              "title": "考官需求申报",
+              "href": "page/course/list",
+              "icon": "fa fa-shield",
+              "target": "_self"
+            },
+            {
+              "title": "考官分配",
+              "href": "page/student/list",
+              "icon": "fa fa-shield",
+              "target": "_self"
+            },
+            {
+              "title": "考官状态确认",
+              "href": "page/class/list",
+              "icon": "fa fa-shield",
+              "target": "_self"
+            },
+            {
+              "title": "考官状态查询",
+              "href": "page/batch/list",
+              "icon": "fa fa-shield",
+              "target": "_self"
+            },
+            {
+              "title": "考官评价",
+              "href": "page/department/list",
+              "icon": "fa fa-shield",
+              "target": "_self"
+            }
+          ]
+        },
+        {
+          "title": "系统管理",
+          "href": "",
+          "icon": "fa fa-shield",
+          "target": "_self",
+          "child":[
+            {
+              "title": "角色管理",
+              "href": "page/department/list",
+              "icon": "fa fa-shield",
+              "target": "_self"
+            },
+            {
+              "title": "用户管理",
+              "href": "page/department/list",
+              "icon": "fa fa-shield",
+              "target": "_self"
+            },{
+              "title": "权限管理",
+              "href": "page/department/list",
+              "icon": "fa fa-shield",
+              "target": "_self"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
