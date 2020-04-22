@@ -23,6 +23,7 @@ public interface ExamTypeService {
 
     DictExamType findOneByName(String typeNmae);
 
+
     Page<DictExamType> findAll(Specification<DictExamType> examTypeSpecification, Pageable pageable);
 
 }

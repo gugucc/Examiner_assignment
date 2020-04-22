@@ -20,7 +20,7 @@ public interface DistrictService {
 
     int deleteAllDistrict(List<Long> districtList);
 
-    DictDistrict findOneByName(String districtNmae);
+    DictDistrict findOneByName(String districtName);
 
     Page<DictDistrict> findAll(Specification<DictDistrict> districtSpecification, Pageable pageable);
 }

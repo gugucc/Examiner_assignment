@@ -19,21 +19,17 @@ public class AdminMainController {
     public String user_password(){
         return "admin/user-password.html";
     }
-    @RequestMapping("/student/list")
-    public String user_list(){
-        return "admin/student-list.html";
-    }
-    @RequestMapping("/student/edit")
-    public String user_edit(){
-        return "admin/student-edit.html";
-    }
     @RequestMapping("/examSite/list")
     public String examSite_list(){
         return "admin/examSite-list.html";
     }
-    @RequestMapping("/confirmResult/list")
-    public String department_list(){
-        return "admin/confirmResult-list.html";
+    @RequestMapping("/exam/list")
+    public String exam_list(){
+        return "admin/exam-list.html";
+    }
+    @RequestMapping("/evaluateItem/list")
+    public String evaluateItem_list(){
+        return "admin/evaluateItem-list.html";
     }
     @RequestMapping("/examType/list")
     public String examType_list(){
@@ -47,16 +43,28 @@ public class AdminMainController {
     public String studySubject_list(){
         return "admin/studySubject-list.html";
     }
-    @RequestMapping("/teachingManagement/list")
-    public String teachingManagement(){
-        return "admin/teaching-management-list.html";
-    }
     @RequestMapping("/examiner/list")
     public String examiner_list(){
         return "admin/examiner-list.html";
     }
+    @RequestMapping("/examinerStatus/list")
+    public String examinerStatus_list(){
+        return "admin/examinerStatus-list.html";
+    }
+    @RequestMapping("/evaluationRecording/list")
+    public String evaluationRecording_list(){
+        return "admin/evaluationRecording-list.html";
+    }
+    @RequestMapping("/viewExaminer/list")
+    public String viewExaminer_list(){
+        return "admin/viewExaminer-list.html";
+    }
     @RequestMapping("/view")
     public String view(){
         return "admin/view2.html";
+    }
+    @RequestMapping("/insert-admin")
+    public String insertAdmin(){
+        return "admin/insert-admin.html";
     }
 }

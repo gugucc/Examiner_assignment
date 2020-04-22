@@ -35,5 +35,8 @@ public interface ExamSiteRepository extends JpaRepository<ExamSite,Long> {
     @Query(value = "select * from exam_site where exam_site_name= ?1",nativeQuery = true)
     ExamSite findOneByName(String examSiteName);
 
+    @Query(value = "select * from exam_site where principal= ?1",nativeQuery = true)
+    ExamSite findOneByPrincipalName(String principal);
+
     Page<ExamSite> findAll(Specification<ExamSite> ets, Pageable pageable);
 }

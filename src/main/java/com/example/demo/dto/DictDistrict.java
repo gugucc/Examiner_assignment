@@ -21,12 +21,20 @@ public class DictDistrict {
 
     }
 
-    public DictDistrict(String districtName, String districtCode, Long districtSortCode, List<ExamSite> examSites/*, List<Examiner> examiners*/) {
+    public DictDistrict(String districtName, String districtCode, Long districtSortCode, List<ExamSite> examSites) {
         this.districtName = districtName;
         this.districtCode = districtCode;
         this.districtSortCode = districtSortCode;
         this.examSites = examSites;
-        /*his.examiners = examiners;*/
+    }
+
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getDistrictName() {
@@ -35,14 +43,6 @@ public class DictDistrict {
 
     public void setDistrictName(String districtName) {
         this.districtName = districtName;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getDistrictCode() {
@@ -68,12 +68,4 @@ public class DictDistrict {
     public void setExamSites(List<ExamSite> examSites) {
         this.examSites = examSites;
     }
-
-   /* public List<Examiner> getExaminers() {
-        return examiners;
-    }
-
-    public void setExaminers(List<Examiner> examiners) {
-        this.examiners = examiners;
-    }*/
 }

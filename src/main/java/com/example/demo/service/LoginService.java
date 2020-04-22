@@ -15,8 +15,8 @@ public interface LoginService {
 
     /**
      * 考点登录
-     * @param PrnTel
+     * @param username
      * @return
      */
-    ExamSite examsiteLogin(String PrnTel);
+    ExamSite examSiteLogin(String principal);
 }

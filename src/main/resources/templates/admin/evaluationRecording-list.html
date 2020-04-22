@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>layui</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+    <link rel="stylesheet" href="/lib/layui-v2.5.4/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <link rel="stylesheet" href="../../static/lib/laydate/theme/default/laydate.css">
+</head>
+<body>
+<div class="layuimini-container">
+    <div class="layuimini-main">
+        <fieldset class="layui-elem-field layuimini-search">
+            <legend>搜索信息</legend>
+            <div style="margin: 10px 10px 10px 10px">
+                <form class="layui-form layui-form-pane" action="">
+                    <div class="layui-form-item">
+                        <div class="layui-inline">
+                            <label class="layui-form-label">评价人</label>
+                            <div class="layui-input-inline">
+                                <input type="text" id="principal" name="principal" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">考官</label>
+                            <div class="layui-input-inline">
+                                <input type="text" id="examiner" name="examiner" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <a class="layui-btn" lay-submit="" lay-filter="data-search-btn">搜索</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </fieldset>
+        <div class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"> ></div>
+    </div>
+</div>
+<script src="/lib/layui-v2.5.4/layui.js" charset="utf-8" ></script>
+<script src="/lib/laydate/laydate.js" charset="utf-8"></script>
+<script th:inline="none">
+
+    layui.use(['form', 'table'], function () {
+        var $ = layui.jquery,
+            form = layui.form,
+            table = layui.table;
+
+        table.render({
+            elem: document.getElementById('currentTableId'),
+            url: '/evaluationRecording',
+
+            cols: [[
+                {type: "checkbox", width: 50, fixed: "left"},
+                {type: 'numbers', title: '序号', sort: true, width:50},
+                {field: 'principal', title: '评价人'},
+                {field: 'exam', title: '考试'},
+                {field: 'examiner', title: '被评价考官'},
+                {field: 'selectedContent', title: '选择项'},
+                {field: 'score', title: '分数'},
+            ]],
+            page:true,
+            limit:10,
+            response:{statusCode:0},
+            parseData:function (data) {
+                return {
+                    "code": 0, //解析接口状态
+                    "msg": "", //解析提示文本
+                    "count": data.size, //解析数据长度
+                    "data": data.data //解析数据列表
+                }
+            }
+
+        });
+
+        // 监听搜索操作
+        form.on('submit(data-search-btn)', function (data) {
+            // 搜索条件
+            var principal = $('#principal').val();
+            var examiner = $('#examiner').val();
+            //执行搜索重载
+            table.reload('currentTableId', {
+                url:"/LikeEvaluationRecording",
+                page: {
+                    curr: 1
+                }
+                , where: {
+                    'principal': $.trim(principal),
+                    'examiner': $.trim(examiner)
+                }
+            });
+
+            return false;
+        });
+
+    });
+</script>
+<script>
+
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,49 @@
+{
+  "clearInfo": {
+    "clearUrl": "api/clear.json"
+  },
+  "homeInfo": {
+    "title": "首页",
+    "icon": "fa fa-home",
+    "href": "page/welcome?mpi=m-p-i-0"
+  },
+  "logoInfo": {
+    "title": "考官分配",
+    "image": "images/logo.png",
+    "href": ""
+  },
+  "menuInfo": {
+    "currency": {
+      "title": "考点界面",
+      "icon": "fa fa-address-book",
+      "child": [
+        {
+          "title": "考官分配系统",
+          "href": "",
+          "icon": "fa fa-home",
+          "target": "_self",
+          "child": [
+            {
+              "title": "考点考官需求申报",
+              "href": "page/chargeExam/list",
+              "icon": "fa fa-tachometer",
+              "target": "_self"
+            },
+            {
+              "title": "考官评价",
+              "href": "page/endExam/list",
+              "icon": "fa fa-shield",
+              "target": "_self"
+            }
+          ]
+        },
+        {
+          "title": "其他",
+          "href": "page/layer.html",
+          "icon": "fa fa-shield",
+          "target": "_self"
+        }
+      ]
+    }
+  }
+}

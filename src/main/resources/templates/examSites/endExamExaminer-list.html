@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>layui</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta http-equiv="Content-Type" content="multipart/form-data; charset=utf-8" />
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+    <link rel="stylesheet" href="/lib/layui-v2.5.4/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+</head>
+<body>
+<div class="layuimini-container">
+    <div class="layuimini-main">
+        <input type="hidden" th:value="${exam.id}">
+        <div class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"> ></div>
+        <script type="text/html" id="currentTableBar">
+            {{#  if(d.evaluationState == '1'){ }}
+            <a class="layui-btn layui-btn-xs layui-btn-danger data-count-delete" lay-event="">已评价</a>
+            {{#  } else { }}
+            <a class="layui-btn layui-btn-xs data-count-edit" lay-event="evaluation">评价</a>
+            {{#  } }}
+        </script>
+    </div>
+</div>
+<script src="/lib/layui-v2.5.4/layui.js" charset="utf-8" ></script>
+<script th:inline="none">
+    layui.use(['form', 'table'], function () {
+        var $ = layui.jquery,
+            form = layui.form,
+            table = layui.table;
+        var id = $('input:hidden').val();
+        table.render({
+
+            elem: document.getElementById('currentTableId'),
+            url: '/endExamExaminer?id='+id,
+            cols: [[
+                {type: "checkbox", width: 30, fixed: "left"},
+                {type: 'numbers', title: '序号', sort: true, width:30},
+                {field: 'examinerName', title: '姓名'},
+                {field: 'idCard', title: '身份证号码'},
+                {field: 'sex',title: '性别',width:50},
+                {field: 'examType', title: '学段'},
+                {field: 'subjectName', title: '学科名称'},
+                {field: 'position', title: '职位'},
+                {field: 'mailingAddress', title: '通讯地址'},
+                {field: 'fixedTel', title: '固定电话'},
+                {field: 'tel', title: '手机号码'},
+                {field: 'email', title: '电子邮箱'},
+                {field: 'district', title: '所属区县'},
+                {field: 'state', title: '状态'},
+                {title: '操作', minWidth: 50, templet: '#currentTableBar', fixed: "right", align: "center"}
+            ]],
+            page:true,
+            limit:10,
+            response:{statusCode:0},
+            parseData:function (data) {
+                return {
+                    "code": 0, //解析接口状态
+                    "msg": "", //解析提示文本
+                    "count": data.size, //解析数据长度
+                    "data": data.data //解析数据列表
+                }
+            }
+
+        });
+
+        //监听表格复选框选择
+        table.on('checkbox(currentTableFilter)', function (obj) {
+            console.log(obj)
+        });
+        //监听编辑
+        table.on('tool(currentTableFilter)', function (obj) {
+            var data = obj.data;
+            console.log(data);
+            if (obj.event === 'evaluation') {
+                layer.open({
+                    type:2,
+                    content:"/do?id="+data.id,
+                    maxmin:true,
+                    area: ['550px', '550px'],
+                    shadeClose:true,
+                    end: function(layero, index){//无论是确认还是取消，只要层被销毁了，end都会执行，不携带任何参数。layer.open关闭事件
+                        table.reload('currentTableId',{
+                            url:'/endExamExaminer?id='+id,
+                            where: { //设定异步数据接口的额外参数，任意设
+                            },
+                            page: {
+                                curr: 1 //重新从第 1 页开始
+                            }
+                        });
+                    }
+                })
+            }
+        });
+
+    });
+</script>
+
+</body>
+</html>

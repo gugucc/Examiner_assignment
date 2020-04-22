@@ -34,7 +34,7 @@
                         <div class="layui-inline">
                             <label class="layui-form-label">所属区县</label>
                             <div class="layui-input-inline">
-                                <input type="text" id="districtName" name="districtName" autocomplete="off" class="layui-input">
+                                <input type="text" id="district" name="district" autocomplete="off" class="layui-input">
                             </div>
                         </div>
 
@@ -75,7 +75,7 @@
                 {field: 'principal', title: '考点联系人'},
                 // {field: 'className',title: '班级'},
                 {field: 'prnTel', title: '联系电话'},
-                {field: 'districtName', title: '所属区县'},
+                {field: 'district', title: '所属区县'},
                 {title: '操作', minWidth: 50, templet: '#currentTableBar', fixed: "right", align: "center"}
             ]],
             page:true,
@@ -97,7 +97,7 @@
             // 搜索条件
             var examSiteName = $('#examSiteName').val();
             var principal = $('#principal').val();
-            var districtName = $('#districtName').val();
+            var district = $('#district').val();
             //执行搜索重载
             table.reload('currentTableId', {
                 url:"/LikeExamSite",
@@ -107,7 +107,7 @@
                 , where: {
                     'examSiteName': $.trim(examSiteName),
                     'principal': $.trim(principal),
-                    'districtName': $.trim(districtName),
+                    'district': $.trim(district),
                 }
             });
 

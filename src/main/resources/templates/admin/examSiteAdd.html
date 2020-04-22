@@ -35,7 +35,7 @@
         <label class="layui-form-label">选择考点所属区县</label>
         <div class="layui-input-inline">
             <select name="district" lay-search="" >
-                <option value="" selected disabled style="display: none;">请选择考点所属区县</option>
+                <option value="" selected disabled style="display: none;">请选择考点</option>
                 <span th:each="dst:${districtList}">
                     <option th:value="${dst.id}" th:text="${dst.districtName}"></option>
                 </span>

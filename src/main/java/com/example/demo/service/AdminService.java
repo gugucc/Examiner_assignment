@@ -10,5 +10,6 @@ public interface AdminService {
 
     //保存管理员
     void save(Admin admin);
-
+    //
+    Admin insertAdmin(String username,String password);
 }

@@ -23,8 +23,14 @@ public class AdminServiceImpl implements AdminService {
     public Admin findOneByPassword(String oldPassword) {
         return adminRepository.findOneByPassword(oldPassword);
     }
+
     @Override
     public void save(Admin admin) {
         adminRepository.save(admin);
+    }
+
+    @Override
+    public Admin insertAdmin(String username, String password) {
+        return adminRepository.insertAdmin(username,password);
     }
 }

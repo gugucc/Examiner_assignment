@@ -106,22 +106,22 @@
             cols: [[
                 {type: "checkbox", width: 50, fixed: "left"},
                 {type: 'numbers', title: '序号', sort: true, width:50},
-                {field: 'examinerName', title: '考官姓名'},
-                {field: 'idCard', title: '身份证号码'},
-                {field: 'sex',title: '性别'},
-                {field: 'nation', title: '名族'},
-                {field: 'political', title: '政治面貌'},
-                {field: 'examType', title: '学段'},
-                {field: 'subjectName', title: '学科名称'},
+                {field: 'examinerName', title: '考官姓名', width:100},
+                {field: 'idCard', title: '身份证号码', width:200},
+                {field: 'sex',title: '性别', width:60},
+                {field: 'nation', title: '名族', width:60},
+                {field: 'political', title: '政治面貌', width:100},
+                {field: 'examType', title: '学段', width:130},
+                {field: 'subjectName', title: '学科名称', width:100},
                 {field: 'companyName', title: '单位名称'},
-                {field: 'position', title: '职位'},
-                {field: 'mailingAddress', title: '通讯地址'},
-                {field: 'fixedTel', title: '固定电话'},
-                {field: 'tel', title: '手机号码'},
-                {field: 'email', title: '电子邮箱'},
-                {field: 'districtName', title: '所属区县'},
+                {field: 'position', title: '职位', width:100},
+                {field: 'mailingAddress', title: '通讯地址', width:250},
+                {field: 'fixedTel', title: '固定电话', width:100},
+                {field: 'tel', title: '手机号码', width:150},
+                {field: 'email', title: '电子邮箱', width:250},
+                {field: 'district', title: '所属区县', width:80},
                 {field: 'state', title: '状态'},
-                {title: '操作', minWidth: 50, templet: '#currentTableBar', fixed: "right", align: "center"}
+                {title: '操作', minWidth: 50, templet: '#currentTableBar', fixed: "right", align: "center", width:120}
             ]],
             page:true,
             limit:10,
@@ -144,7 +144,7 @@
             var subjectName = $('#subjectName').val();
             var examType = $('#examType').val();
             var idCard = $('#idCard').val();
-            var districtName = $('#districtName').val();
+            var district = $('#district').val();
             //执行搜索重载
             table.reload('currentTableId', {
                 url:"/LikeExaminer",
@@ -156,7 +156,7 @@
                     'subjectName': $.trim(subjectName),
                     'examType': $.trim(examType),
                     'idCard': $.trim(idCard),
-                    'districtName': $.trim(districtName),
+                    'district': $.trim(district),
                 }
             });
             return false;

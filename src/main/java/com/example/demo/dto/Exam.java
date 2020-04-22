@@ -1,9 +1,10 @@
 package com.example.demo.dto;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import javax.persistence.*;
+import java.sql.Timestamp;
 
 @Entity//考试
 public class Exam {
@@ -12,13 +13,26 @@ public class Exam {
     private Long id;
     private String examName;//考试名称
     private String examCode;//考试代码
-    private String interviewStarTime;//面试开始日期
-    private String interviewEndTime;//面试结束日期
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss" , timezone = "GMT+8")
+    private Timestamp starTime;//面试开始日期
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss" , timezone = "GMT+8")
+    private Timestamp endTime;//面试结束日期
+    private String studySubject;//科目名
+    private String examType;//学段
+    private String absentExaminer;//缺席考官
+    private Integer quantity;//考官申报的数量
+    @ManyToOne//与考点实体多对一关系建立
+    @JoinColumn(name = "examSite_id")
+    @JsonBackReference//禁止此字段序列化，防止死循环
+    private ExamSite examSite;//所属考点
+    @Transient//禁止此字段对应数据库
+    private String ExamSiteName;
+
+    private Integer state;//考试考官分配状态0没有分配；1智能分配；2手动分配
 
     protected Exam(){
 
     }
-
 
     public Long getId() {
         return id;
@@ -44,26 +58,90 @@ public class Exam {
         this.examCode = examCode;
     }
 
-    public String getInterviewStarTime() {
-        return interviewStarTime;
+    public Timestamp getStarTime() {
+        return starTime;
     }
 
-    public void setInterviewStarTime(String interviewStarTime) {
-        this.interviewStarTime = interviewStarTime;
+    public void setStarTime(Timestamp starTime) {
+        this.starTime = starTime;
     }
 
-    public String getInterviewEndTime() {
-        return interviewEndTime;
+    public Timestamp getEndTime() {
+        return endTime;
     }
 
-    public void setInterviewEndTime(String interviewEndTime) {
-        this.interviewEndTime = interviewEndTime;
+    public void setEndTime(Timestamp endTime) {
+        this.endTime = endTime;
     }
 
-    public Exam(String examName, String examCode, String interviewStarTime, String interviewEndTime) {
+    public ExamSite getExamSite() {
+        return examSite;
+    }
+
+    public void setExamSite(ExamSite examSite) {
+        this.examSite = examSite;
+    }
+
+    public String getExamSiteName() {
+        return ExamSiteName;
+    }
+
+    public void setExamSiteName(String examSiteName) {
+        ExamSiteName = examSiteName;
+    }
+
+
+    public String getStudySubject() {
+        return studySubject;
+    }
+
+    public void setStudySubject(String studySubject) {
+        this.studySubject = studySubject;
+    }
+
+    public String getExamType() {
+        return examType;
+    }
+
+    public void setExamType(String examType) {
+        this.examType = examType;
+    }
+
+    public String getAbsentExaminer() {
+        return absentExaminer;
+    }
+
+    public void setAbsentExaminer(String absentExaminer) {
+        this.absentExaminer = absentExaminer;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
+    }
+
+    public Integer getState() {
+        return state;
+    }
+
+    public void setState(Integer state) {
+        this.state = state;
+    }
+
+    public Exam(String examName, String examCode, Timestamp starTime, Timestamp endTime, String studySubject, String examType, String absentExaminer, Integer quantity, ExamSite examSite, String examSiteName, Integer state) {
         this.examName = examName;
         this.examCode = examCode;
-        this.interviewStarTime = interviewStarTime;
-        this.interviewEndTime = interviewEndTime;
+        this.starTime = starTime;
+        this.endTime = endTime;
+        this.studySubject = studySubject;
+        this.examType = examType;
+        this.absentExaminer = absentExaminer;
+        this.quantity = quantity;
+        this.examSite = examSite;
+        ExamSiteName = examSiteName;
+        this.state = state;
     }
 }

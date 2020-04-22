@@ -19,12 +19,12 @@ public interface LoginAdminRepository extends JpaRepository<Admin,Long> {
 
 
     /**
-     * 查询学生
-     * @param PrnTel
+     * 查询考点联系人
+     * @param principal
      * @return
      */
-    @Query(value="from ExamSite where PrnTel=?1")
-    ExamSite examsiteLogin(String PrnTel);
+    @Query(value="from ExamSite where principal=?1")
+    ExamSite examSiteLogin(String principal);
 
 
 }

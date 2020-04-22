@@ -57,6 +57,11 @@ public class ExamSiteServiceImp implements ExamSiteService {
     }
 
     @Override
+    public ExamSite findOneByPrincipalName(String principal) {
+        return examSiteRepository.findOneByPrincipalName(principal);
+    }
+
+    @Override
     public Page<ExamSite> findAll(Specification<ExamSite> ets, Pageable pageable) {
         return examSiteRepository.findAll(ets,pageable);
     }

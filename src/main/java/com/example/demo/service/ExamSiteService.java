@@ -23,5 +23,7 @@ public interface ExamSiteService {
 
     ExamSite findOneByName(String examSiteName);
 
+    ExamSite findOneByPrincipalName(String principal);
+
     Page<ExamSite> findAll(Specification<ExamSite> examSiteSpecification, Pageable pageable);
 }

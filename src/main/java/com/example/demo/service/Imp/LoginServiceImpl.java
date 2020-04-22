@@ -21,8 +21,8 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public ExamSite examsiteLogin(String PrnTel) {
-        return loginAdminRepository.examsiteLogin(PrnTel);
+    public ExamSite examSiteLogin(String principal) {
+        return loginAdminRepository.examSiteLogin(principal);
     }
 
 

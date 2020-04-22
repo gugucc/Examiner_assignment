@@ -11,15 +11,21 @@ public class EvaluateItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String itemName;//评价项
-    private String score;//分值
-    private Long itemSortCode;//排序码
-    private Long evaluateTargetId;//评价维度
+    private String evaluateName;//
+    private String optionA;//评价项A
+    private String optionB;//评价项B
+    private String optionC;//评价项C
 
     protected EvaluateItem(){
 
     }
 
+    public EvaluateItem(String evaluateName, String optionA, String optionB, String optionC) {
+        this.evaluateName = evaluateName;
+        this.optionA = optionA;
+        this.optionB = optionB;
+        this.optionC = optionC;
+    }
 
     public Long getId() {
         return id;
@@ -29,42 +35,35 @@ public class EvaluateItem {
         this.id = id;
     }
 
-    public String getItemName() {
-        return itemName;
+    public String getEvaluateName() {
+        return evaluateName;
     }
 
-    public void setItemName(String itemName) {
-        this.itemName = itemName;
+    public void setEvaluateName(String evaluateName) {
+        this.evaluateName = evaluateName;
     }
 
-    public String getScore() {
-        return score;
+    public String getOptionA() {
+        return optionA;
     }
 
-    public void setScore(String score) {
-        this.score = score;
+    public void setOptionA(String optionA) {
+        this.optionA = optionA;
     }
 
-    public Long getItemSortCode() {
-        return itemSortCode;
+    public String getOptionB() {
+        return optionB;
     }
 
-    public void setItemSortCode(Long itemSortCode) {
-        this.itemSortCode = itemSortCode;
+    public void setOptionB(String optionB) {
+        this.optionB = optionB;
     }
 
-    public Long getEvaluateTargetId() {
-        return evaluateTargetId;
+    public String getOptionC() {
+        return optionC;
     }
 
-    public void setEvaluateTargetId(Long evaluateTargetId) {
-        this.evaluateTargetId = evaluateTargetId;
-    }
-
-    public EvaluateItem(String itemName, String score, Long itemSortCode, Long evaluateTargetId) {
-        this.itemName = itemName;
-        this.score = score;
-        this.itemSortCode = itemSortCode;
-        this.evaluateTargetId = evaluateTargetId;
+    public void setOptionC(String optionC) {
+        this.optionC = optionC;
     }
 }

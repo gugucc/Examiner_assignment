@@ -3,6 +3,8 @@ package com.example.demo.dto;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 //考点
 @Entity
@@ -11,16 +13,13 @@ public class ExamSite {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String ExamSiteName;//考点名称
-    @Transient//禁止此字段对应数据库
-    private String districtName;
-    @ManyToOne//与区县实体多对一关系建立
-    @JoinColumn(name = "district_id")
-    @JsonBackReference//禁止此字段序列化，防止死循环
-    private DictDistrict district;//所属区县
-
+    private String district;
+    @OneToMany(mappedBy = "examSite")//与考点建立一对多关系
+    private List<Exam> exams = new ArrayList<>();
     private String Principal;//负责人
     private String PrnTel;//负责人电话
-    private String examinerId;//考官id
+
+
     protected ExamSite(){
 
     }
@@ -41,12 +40,20 @@ public class ExamSite {
         ExamSiteName = examSiteName;
     }
 
-    public DictDistrict getDistrict() {
+    public String getDistrict() {
         return district;
     }
 
-    public void setDistrict(DictDistrict district) {
+    public void setDistrict(String district) {
         this.district = district;
+    }
+
+    public List<Exam> getExams() {
+        return exams;
+    }
+
+    public void setExams(List<Exam> exams) {
+        this.exams = exams;
     }
 
     public String getPrincipal() {
@@ -65,28 +72,12 @@ public class ExamSite {
         PrnTel = prnTel;
     }
 
-    public String getExaminerId() {
-        return examinerId;
-    }
 
-    public void setExaminerId(String examinerId) {
-        this.examinerId = examinerId;
-    }
-
-    public String getDistrictName() {
-        return districtName;
-    }
-
-    public void setDistrictName(String districtName) {
-        this.districtName = districtName;
-    }
-
-    public ExamSite(String examSiteName, String districtName, DictDistrict district, String principal, String prnTel, String examinerId) {
+    public ExamSite(String examSiteName, String district, List<Exam> exams, String principal, String prnTel) {
         ExamSiteName = examSiteName;
-        this.districtName = districtName;
         this.district = district;
+        this.exams = exams;
         Principal = principal;
         PrnTel = prnTel;
-        this.examinerId = examinerId;
     }
 }

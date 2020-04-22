@@ -9,15 +9,21 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.persistence.criteria.*;
 import javax.servlet.http.HttpServletRequest;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Controller
 public class AdminController {
+    @Autowired
+    private LoginService loginService;
     @Autowired
     private AdminService adminService;
     @Autowired
@@ -33,15 +39,19 @@ public class AdminController {
     @Autowired
     private DistrictService districtService;
     @Autowired
-    private ConfirmResultService confirmResultService;
+    private EvaluateItemService evaluateItemService;
     @Autowired
     private ExamSiteService examSiteService;
+    @Autowired
+    private ExamService examService;
+    @Autowired
+    private EvaluationRecordingService evaluationRecordingService;
 
     //管理员登录后主页面
-    @RequestMapping(value = "/admin",method = RequestMethod.GET)
-    public ModelAndView index(@ModelAttribute("msg") String msg, Model model, HttpServletRequest request){
+    @RequestMapping(value = "/admin", method = RequestMethod.GET)
+    public ModelAndView index(@ModelAttribute("msg") String msg, Model model, HttpServletRequest request) {
         model.addAttribute("msg", msg);
-        if (!(request.getSession().getAttribute("user") instanceof Admin)){
+        if (!(request.getSession().getAttribute("user") instanceof Admin)) {
             return new ModelAndView("error/403");
         }
         return new ModelAndView("admin/index");
@@ -52,87 +62,98 @@ public class AdminController {
     @ResponseBody
     public String changePassword(String old_password, String new_password) {
         Admin admin = adminService.findOneByPassword(old_password);
-        if (admin != null){
+        if (admin != null) {
             admin.setPassword(new_password);
             adminService.save(admin);
             return "ok";
-        }else if (admin == null){
+        } else if (admin == null) {
             return "no";
         }
         return "fail";
+    }
+
+    //管理员注册
+    @PostMapping(value = "/insertAdmin")
+    @ResponseBody
+    public String insertAdmin(Admin admin) {
+        if (loginService.AdminLogin(admin.getUsername()) != null) {
+            return "no";
+        }else{
+            String MD5Password= DigestUtils.md5DigestAsHex(admin.getPassword().getBytes());
+            admin.setUsername(admin.getUsername());
+            admin.setPassword(MD5Password);
+            adminService.save(admin);
+            return "ok";
+        }
     }
 
 
     //考官列表获取
     @GetMapping("/examiner")
     @ResponseBody
-    public Map<String,Object> examiner(Integer page, Integer limit){
+    public Map<String, Object> examiner(Integer page, Integer limit) {
         page--;
-        Pageable pageable = PageRequest.of(page,limit);
+        Pageable pageable = PageRequest.of(page, limit);
         List<Examiner> content = examinerService.findAll(pageable).getContent();
-        Map<String,Object> map = new HashMap<>();
-        /*for (Examiner s:content
-        ) {
-            s.setDistrictName(s.getDistrict().getDistrictName());
-        }*/
-        map.put("data",content);
-        map.put("size",examinerService.findAllCount());
+        Map<String, Object> map = new HashMap<>();
+        map.put("data", content);
+        map.put("size", examinerService.findAllCount());
         return map;
     }
 
 
-
     //修改考官信息：页面
     @GetMapping("/editExaminer")
-    public ModelAndView editExaminerPage(Long id,Model model){
+    public ModelAndView editExaminerPage(Long id, Model model) {
         Examiner examiner = examinerService.findById(id);
+        model.addAttribute("nation",examiner.getNation());
+        model.addAttribute("politicalName",examiner.getPolitical());
+        model.addAttribute("TypeName",examiner.getExamType());
+        model.addAttribute("studySubject",examiner.getSubjectName());
+        model.addAttribute("district",examiner.getDistrict());
         List<DictNation> nationList = nationService.findAllList();
         List<DictPolitical> politicalList = politicalService.findAllList();
         List<DictExamType> examTypeList = examTypeService.findAllList();
         List<DictStudySubject> studySubjectList = studySubjectService.findAllList();
         List<DictDistrict> districtList = districtService.findAllList();
-        model.addAttribute("examiner",examiner);
-        model.addAttribute("nationList",nationList);
-        model.addAttribute("politicalList",politicalList);
-        model.addAttribute("examTypeList",examTypeList);
-        model.addAttribute("studySubjectList",studySubjectList);
-        model.addAttribute("districtList",districtList);
-
-        /*model.addAttribute("district",examiner.getDistrict().getDistrictName());*/
+        model.addAttribute("examiner", examiner);
+        model.addAttribute("nationList", nationList);
+        model.addAttribute("politicalList", politicalList);
+        model.addAttribute("examTypeList", examTypeList);
+        model.addAttribute("studySubjectList", studySubjectList);
+        model.addAttribute("districtList", districtList);
         System.out.println(id);
-        return new ModelAndView("admin/examinerForm.html","model",model);
+        return new ModelAndView("admin/examinerForm.html", "model", model);
     }
+
     //方法
     @PostMapping("/editExaminer")
     @ResponseBody
-    public String editExaminer(Examiner examiner,Long nationId,Long politicalId,Long examTypeId,Long studySubjectId,Long district){
+    public String editExaminer(Examiner examiner) {
 
         System.out.println(examiner.getId());
         Examiner examinerNew = examinerService.findById(examiner.getId());
-        DictNation nation = nationService.findById(nationId);
-        DictPolitical political = politicalService.findById(politicalId);
-        DictExamType examType = examTypeService.findById(examTypeId);
-        DictStudySubject studySubject = studySubjectService.findById(studySubjectId);
-        DictDistrict district1 = districtService.findById(district);
+        /*DictNation nationNew = nationService.findById(nation);
+        DictPolitical politicalNew = politicalService.findById(political);
+        DictExamType examTypeNew = examTypeService.findById(examType);
+        DictStudySubject studySubjectNew = studySubjectService.findById(studySubject);
+        DictDistrict districtNew = districtService.findById(district);*/
         if (examinerNew.getExaminerName().equals(examiner.getExaminerName())) {
-            if(examinerNew.getIdCard().equals(examiner.getIdCard())){
-                    if (examinerNew.getSex().equals(examiner.getSex())){
-                        if (examinerNew.getNation().equals(nation.getNationName())){
-                            if (examinerNew.getPolitical().equals(political.getPoliticalName())){
-                                if (examinerNew.getExamType().equals(examType.getTypeName())) {
-                                    if (examinerNew.getSubjectName().equals(studySubject.getSubjectName())) {
-                                        if (examinerNew.getCompanyName().equals(examiner.getCompanyName())) {
-                                            if (examinerNew.getPosition().equals(examiner.getPosition())) {
-                                                if (examinerNew.getMailingAddress().equals(examiner.getMailingAddress())) {
-                                                    if (examinerNew.getFixedTel().equals(examiner.getFixedTel())) {
-                                                        if (examinerNew.getTel().equals(examiner.getTel())) {
-                                                            if (examinerNew.getEmail().equals(examiner.getEmail())) {
-                                                                if (examinerNew.getDistrict().equals(examiner.getDistrict())){
-                                                                    /*if (examinerNew.getDistrict().getDistrictName().equals(examiner.getDistrict().getDistrictName())) {*/
-                                                                    if (examinerNew.getState().equals(examiner.getState())) {
-                                                                            return "noEdit";
-
-                                                                    }
+            if (examinerNew.getIdCard().equals(examiner.getIdCard())) {
+                if (examinerNew.getSex().equals(examiner.getSex())) {
+                    if (examinerNew.getNation().equals(examiner.getNation())) {
+                        if (examinerNew.getPolitical().equals(examiner.getPolitical())) {
+                            if (examinerNew.getExamType().equals(examiner.getExamType())) {
+                                if (examinerNew.getSubjectName().equals(examiner.getSubjectName())) {
+                                    if (examinerNew.getCompanyName().equals(examiner.getCompanyName())) {
+                                        if (examinerNew.getPosition().equals(examiner.getPosition())) {
+                                            if (examinerNew.getMailingAddress().equals(examiner.getMailingAddress())) {
+                                                if (examinerNew.getFixedTel().equals(examiner.getFixedTel())) {
+                                                    if (examinerNew.getTel().equals(examiner.getTel())) {
+                                                        if (examinerNew.getEmail().equals(examiner.getEmail())) {
+                                                            if (examinerNew.getDistrict().equals(examiner.getDistrict())) {
+                                                                if (examinerNew.getState().equals(examiner.getState())) {
+                                                                    return "noEdit";
                                                                 }
                                                             }
                                                         }
@@ -145,20 +166,21 @@ public class AdminController {
                             }
                         }
                     }
+                }
             }
             examinerNew.setExaminerName(examiner.getExaminerName());
             examinerNew.setIdCard(examiner.getIdCard());
             examinerNew.setSex(examiner.getSex());
-            examinerNew.setNation(nation.getNationName());
-            examinerNew.setPolitical(political.getPoliticalName());
-            examinerNew.setExamType(examType.getTypeName());
-            examinerNew.setSubjectName(studySubject.getSubjectName());
+            examinerNew.setNation(examiner.getNation());
+            examinerNew.setPolitical(examiner.getPolitical());
+            examinerNew.setExamType(examiner.getExamType());
+            examinerNew.setSubjectName(examiner.getSubjectName());
             examinerNew.setCompanyName(examiner.getCompanyName());
             examinerNew.setMailingAddress(examiner.getMailingAddress());
             examinerNew.setFixedTel(examiner.getFixedTel());
             examinerNew.setTel(examiner.getTel());
             examinerNew.setEmail(examiner.getEmail());
-            examinerNew.setDistrict(district1.getDistrictName());
+            examinerNew.setDistrict(examiner.getDistrict());
             examinerNew.setState(examiner.getState());
             examinerService.saveOne(examinerNew);
             System.out.println(examiner.getEmail());
@@ -170,16 +192,16 @@ public class AdminController {
                 examinerNew.setExaminerName(examiner.getExaminerName());
                 examinerNew.setIdCard(examiner.getIdCard());
                 examinerNew.setSex(examiner.getSex());
-                examinerNew.setNation(nation.getNationName());
-                examinerNew.setPolitical(political.getPoliticalName());
-                examinerNew.setExamType(examType.getTypeName());
-                examinerNew.setSubjectName(studySubject.getSubjectName());
+                examinerNew.setNation(examiner.getNation());
+                examinerNew.setPolitical(examiner.getPolitical());
+                examinerNew.setExamType(examiner.getExamType());
+                examinerNew.setSubjectName(examiner.getSubjectName());
                 examinerNew.setCompanyName(examiner.getCompanyName());
                 examinerNew.setMailingAddress(examiner.getMailingAddress());
                 examinerNew.setFixedTel(examiner.getFixedTel());
                 examinerNew.setTel(examiner.getTel());
                 examinerNew.setEmail(examiner.getEmail());
-                examinerNew.setDistrict(district1.getDistrictName());
+                examinerNew.setDistrict(examiner.getDistrict());
                 examinerNew.setState(examiner.getState());
                 examinerService.saveOne(examinerNew);
                 return "ok";
@@ -190,35 +212,35 @@ public class AdminController {
     }
 
 
-
     //添加考官的界面
     @GetMapping("/addExaminer")
-    public ModelAndView addExaminer(Model model){
+    public ModelAndView addExaminer(Model model) {
         List<DictNation> nationList = nationService.findAllList();
         List<DictPolitical> politicalList = politicalService.findAllList();
         List<DictExamType> examTypeList = examTypeService.findAllList();
         List<DictStudySubject> studySubjectList = studySubjectService.findAllList();
         List<DictDistrict> districtList = districtService.findAllList();
-        model.addAttribute("nationList",nationList);
-        model.addAttribute("politicalList",politicalList);
-        model.addAttribute("examTypeList",examTypeList);
-        model.addAttribute("studySubjectList",studySubjectList);
-        model.addAttribute("districtList",districtList);
-       // model.addAttribute("cgClassList",cgClassList);
+        model.addAttribute("nationList", nationList);
+        model.addAttribute("politicalList", politicalList);
+        model.addAttribute("examTypeList", examTypeList);
+        model.addAttribute("studySubjectList", studySubjectList);
+        model.addAttribute("districtList", districtList);
+        // model.addAttribute("cgClassList",cgClassList);
 
-        return new ModelAndView("admin/examinerAdd.html","model",model);
+        return new ModelAndView("admin/examinerAdd.html", "model", model);
     }
+
     //添加考官的方法
     @PostMapping("/addExaminer")
     @ResponseBody
-    public String addExaminer(Examiner examiner,Long nationId,Long politicalId,Long examTypeId,Long studySubjectId,Long districtId){
-        DictNation nation = nationService.findById(nationId);
+    public String addExaminer(Examiner examiner/*,Long nationId,Long politicalId,Long examTypeId,Long studySubjectId,Long districtId*/) {
+        /*DictNation nation = nationService.findById(nationId);
         DictPolitical political = politicalService.findById(politicalId);
         DictExamType examType = examTypeService.findById(examTypeId);
         DictStudySubject studySubject = studySubjectService.findById(studySubjectId);
-        DictDistrict district = districtService.findById(districtId);
+        DictDistrict district = districtService.findById(districtId);*/
         //判断身份证号是否存在
-        if (examinerService.findOneByIdCard(examiner.getIdCard()) !=null){
+        if (examinerService.findOneByIdCard(examiner.getIdCard()) != null) {
 //            System.out.println(666);
             return "equals";
         }
@@ -237,10 +259,12 @@ public class AdminController {
         examiner.setEmail(examiner.getEmail());
         examiner.setDistrict(examiner.getDistrict());
         examiner.setState(examiner.getState());
-        try{
+        System.out.println(examiner.getState());
+        System.out.println(examiner.getSubjectName());
+        try {
             examinerService.saveOne(examiner);
             return "ok";
-        } catch (Exception e){
+        } catch (Exception e) {
             return "no";
         }
 
@@ -250,23 +274,24 @@ public class AdminController {
     //删除单个考官
     @PostMapping("/deleteExaminer")
     @ResponseBody
-    public int deleteExaminer(int id){
-        int i =examinerService.deleteExaminer(id);
-        System.out.println("======"+id);
+    public int deleteExaminer(int id) {
+        int i = examinerService.deleteExaminer(id);
+        System.out.println("======" + id);
         return i;
     }
+
     //删除多个学考官
     @PostMapping("/deleteAllExaminer")
     @ResponseBody
-    public int deleteAllExaminer(@RequestParam("id") String id){
+    public int deleteAllExaminer(@RequestParam("id") String id) {
         // 接收包含stuId的字符串，并将它分割成字符串数组
         String[] stuList = id.split(",");
         // 将字符串数组转为List<Intger> 类型
         List<Long> LString = new ArrayList<Long>();
-        for(String str : stuList){
+        for (String str : stuList) {
             LString.add(new Long(str));
         }
-        System.out.println("====="+LString);
+        System.out.println("=====" + LString);
         // 调用service层的批量删除函数
         int i = examinerService.deleteAllExaminer(LString);
         return i;
@@ -276,10 +301,10 @@ public class AdminController {
     //搜索考官
     @GetMapping("/LikeExaminer")
     @ResponseBody
-    public Map<String,Object> examiner(Integer page, Integer limit,Examiner examiner){
+    public Map<String, Object> examiner(Integer page, Integer limit, Examiner examiner) {
         page--;
-        Pageable pageable = PageRequest.of(page,limit);
-        List<Examiner> content = examinerService.findAll(new Specification<Examiner>(){
+        Pageable pageable = PageRequest.of(page, limit);
+        List<Examiner> content = examinerService.findAll(new Specification<Examiner>() {
             @Override
             public Predicate toPredicate(Root<Examiner> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder cb) {
                 List<Predicate> list = new ArrayList<>();
@@ -289,30 +314,29 @@ public class AdminController {
                 }
                 //根据subjectCode 查询 examiner
                 if (StringUtils.isNotBlank(examiner.getSubjectName())) {
-                    list.add(cb.like(root.get("subjectCode").as(String.class), "%"+ examiner.getSubjectName()+ "%"));
+                    list.add(cb.like(root.get("subjectCode").as(String.class), "%" + examiner.getSubjectName() + "%"));
                 }
                 //根据examType 查询 examiner
                 if (StringUtils.isNotBlank(examiner.getExamType())) {
-                    list.add(cb.like(root.get("examType").as(String.class), "%"+ examiner.getExamType()+ "%"));
+                    list.add(cb.like(root.get("examType").as(String.class), "%" + examiner.getExamType() + "%"));
                 }
                 //根据idCard 查询 examiner
                 if (StringUtils.isNotBlank(examiner.getIdCard())) {
-                    list.add(cb.like(root.get("idCard").as(String.class), "%"+ examiner.getIdCard()+ "%"));
+                    list.add(cb.like(root.get("idCard").as(String.class), "%" + examiner.getIdCard() + "%"));
                 }
                 //根据examinerDistrict 查询 examiner
-                if (StringUtils.isNotBlank(examiner.getDistrictName())) {
-                    Join<DictDistrict, Examiner> join = root.join("department", JoinType.LEFT);
-                    list.add(cb.like(join.get("dptName"),"%"+ examiner.getDistrictName()+ "%"));
+                if (StringUtils.isNotBlank(examiner.getDistrict())) {
+                    list.add(cb.like(root.get("district").as(String.class), "%" + examiner.getDistrict() + "%"));
                 }
                 Predicate[] pre = new Predicate[list.size()];
                 criteriaQuery.where(list.toArray(pre));
                 return cb.and(list.toArray(pre));
             }
-        },pageable).getContent();
-        Map<String,Object> map = new HashMap<>();
+        }, pageable).getContent();
+        Map<String, Object> map = new HashMap<>();
 
-        map.put("data",content);
-        map.put("size",examinerService.findAllCount());
+        map.put("data", content);
+        map.put("size", examinerService.findAllCount());
         return map;
     }
 
@@ -320,41 +344,40 @@ public class AdminController {
     //学段列表获取
     @GetMapping("/examType")
     @ResponseBody
-    public Map<String,Object> examType(Integer page, Integer limit){
+    public Map<String, Object> examType(Integer page, Integer limit) {
         page--;
-        Pageable pageable = PageRequest.of(page,limit);
+        Pageable pageable = PageRequest.of(page, limit);
         List<DictExamType> content = examTypeService.findAll(pageable).getContent();
-        Map<String,Object> map = new HashMap<>();
-        map.put("data",content);
-        map.put("size",examTypeService.findAllCount());
+        Map<String, Object> map = new HashMap<>();
+        map.put("data", content);
+        map.put("size", examTypeService.findAllCount());
         return map;
     }
 
     //修改页面获取
     @GetMapping("/editExamType")
-    public ModelAndView toEditExamType(Long id,Model model){
+    public ModelAndView toEditExamType(Long id, Model model) {
         System.out.println(id);
         DictExamType dictExamType = examTypeService.findById(id);
-        model.addAttribute("DictExamType",dictExamType);
-        return new ModelAndView("admin/examTypeForm.html","model",model);
+        model.addAttribute("DictExamType", dictExamType);
+        return new ModelAndView("admin/examTypeForm.html", "model", model);
     }
+
     //方法
     @PostMapping("/editExamType")
     @ResponseBody
-    public String editExamType(DictExamType dictExamType){
+    public String editExamType(DictExamType dictExamType) {
         DictExamType examTypeNew = examTypeService.findById(dictExamType.getId());
-        if (examTypeNew.getTypeName().equals(dictExamType.getTypeName())){
+        if (examTypeNew.getTypeName().equals(dictExamType.getTypeName())) {
             examTypeNew.setTypeName(dictExamType.getTypeName());
             examTypeNew.setTypeCode(dictExamType.getTypeCode());
             examTypeNew.setTypeSortCode(dictExamType.getTypeSortCode());
             examTypeService.saveOne(examTypeNew);
             return "ok";
-        }
-        else {
+        } else {
             if (examTypeService.findOneByName(dictExamType.getTypeName()) != null) {
                 return "equals";
-            }
-            else {
+            } else {
                 examTypeNew.setTypeName(dictExamType.getTypeName());
                 examTypeNew.setTypeCode(dictExamType.getTypeCode());
                 examTypeNew.setTypeSortCode(dictExamType.getTypeSortCode());
@@ -363,17 +386,19 @@ public class AdminController {
             }
         }
     }
+
     //添加学段的界面
     @GetMapping("/addExamType")
-    public ModelAndView addExamType(Model model){
-        return new ModelAndView("admin/examTypeAdd.html","model",model);
+    public ModelAndView addExamType(Model model) {
+        return new ModelAndView("admin/examTypeAdd.html", "model", model);
     }
+
     //添加班级的方法
     @PostMapping("/addExamType")
     @ResponseBody
-    public String addExamType(DictExamType dictExamType){
+    public String addExamType(DictExamType dictExamType) {
         //判断班级名称是否存在
-        if (examTypeService.findOneByName(dictExamType.getTypeName())!=null){
+        if (examTypeService.findOneByName(dictExamType.getTypeName()) != null) {
             return "equals";
         }
         dictExamType.setTypeName(dictExamType.getTypeName());
@@ -382,30 +407,30 @@ public class AdminController {
         try {
             examTypeService.saveOne(dictExamType);
             return "ok";
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             return "no";
         }
     }
+
     //删除单个
     @GetMapping("/deleteExamType")
     @ResponseBody
-    public String deleteExamType(int id){
+    public String deleteExamType(int id) {
         DictExamType dictExamType = examTypeService.findById(Long.valueOf(id));
-        int i =examTypeService.deleteExamType(id);
-        System.out.println("======"+id);
+        int i = examTypeService.deleteExamType(id);
+        System.out.println("======" + id);
         return "ok";
     }
 
     //多个删除
     @GetMapping("/deleteAllExamType")
     @ResponseBody
-    public String deleteAllExamType(@RequestParam("id") String id){
+    public String deleteAllExamType(@RequestParam("id") String id) {
         // 接收包含stuId的字符串，并将它分割成字符串数组
         String[] detList = id.split(",");
         // 将字符串数组转为List<Intger> 类型
         List<Long> LString = new ArrayList<Long>();
-        for(String str : detList){
+        for (String str : detList) {
             DictExamType det = examTypeService.findById(Long.valueOf(id));
             /*if (det.getStudents()!=null&&det.getTeachers()!=null&&det.getCgClasses()!=null){
                 return "no";
@@ -421,32 +446,33 @@ public class AdminController {
     //学科列表获取
     @GetMapping("/studySubject")
     @ResponseBody
-    public Map<String,Object> studySubject(Integer page, Integer limit){
+    public Map<String, Object> studySubject(Integer page, Integer limit) {
         page--;
-        Pageable pageable = PageRequest.of(page,limit);
+        Pageable pageable = PageRequest.of(page, limit);
         List<DictStudySubject> content = studySubjectService.findAll(pageable).getContent();
-        Map<String,Object> map = new HashMap<>();
-        map.put("data",content);
-        map.put("size",studySubjectService.findAllCount());
+        Map<String, Object> map = new HashMap<>();
+        map.put("data", content);
+        map.put("size", studySubjectService.findAllCount());
         return map;
     }
 
     //修改页面获取
     @GetMapping("/editStudySubject")
-    public ModelAndView toStudySubject(Long id,Model model){
+    public ModelAndView toStudySubject(Long id, Model model) {
 
         DictStudySubject studySubject = studySubjectService.findById(id);
-        model.addAttribute("studySubject",studySubject);
-        return new ModelAndView("admin/studySubjectForm.html","model",model);
+        model.addAttribute("studySubject", studySubject);
+        return new ModelAndView("admin/studySubjectForm.html", "model", model);
     }
+
     //方法
     @PostMapping("/editStudySubject")
     @ResponseBody
-    public String editStudySubject(DictStudySubject studySubject){
+    public String editStudySubject(DictStudySubject studySubject) {
         DictStudySubject studySubjectNew = studySubjectService.findById(studySubject.getId());
-        if (studySubjectNew.getSubjectName().equals(studySubject.getSubjectName())){
+        if (studySubjectNew.getSubjectName().equals(studySubject.getSubjectName())) {
 
-            if (studySubjectNew.getSubjectCode().equals(studySubject.getSubjectCode())){
+            if (studySubjectNew.getSubjectCode().equals(studySubject.getSubjectCode())) {
                 if (studySubjectNew.getSubjectSortCode().equals(studySubject.getSubjectSortCode()))
                     return "noEdit";
             }
@@ -456,12 +482,10 @@ public class AdminController {
             studySubjectNew.setSubjectSortCode(studySubject.getSubjectSortCode());
             studySubjectService.saveOne(studySubjectNew);
             return "ok";
-        }
-        else {
+        } else {
             if (studySubjectService.findOneByName(studySubject.getSubjectName()) != null) {
                 return "equals";
-            }
-            else {
+            } else {
                 studySubjectNew.setSubjectName(studySubject.getSubjectName());
                 studySubjectNew.setSubjectCode(studySubject.getSubjectCode());
                 studySubjectNew.setSubjectSortCode(studySubject.getSubjectSortCode());
@@ -474,24 +498,23 @@ public class AdminController {
 
     //添加科目的界面
     @GetMapping("/addStudySubject")
-    public ModelAndView addStudySubject(Model model){
+    public ModelAndView addStudySubject(Model model) {
 
-        return new ModelAndView("admin/studySubjectAdd.html","model",model);
+        return new ModelAndView("admin/studySubjectAdd.html", "model", model);
     }
 
 
     //添加科目的方法
     @PostMapping("/addStudySubject")
     @ResponseBody
-    public String addStudySubject(DictStudySubject studySubject){
-        if (studySubjectService.findOneByName(studySubject.getSubjectName())!=null){
+    public String addStudySubject(DictStudySubject studySubject) {
+        if (studySubjectService.findOneByName(studySubject.getSubjectName()) != null) {
             return "equals";
         }
         try {
             studySubjectService.saveOne(studySubject);
             return "ok";
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             return "no";
         }
     }
@@ -499,20 +522,21 @@ public class AdminController {
     //单个删除
     @GetMapping("/deleteStudySubject")
     @ResponseBody
-    public String deleteStudySubject(int id){
+    public String deleteStudySubject(int id) {
         DictStudySubject dss = studySubjectService.findById(Long.valueOf(id));
         studySubjectService.deleteStudySubject(id);
         return "no";
     }
+
     //多个删除
     @GetMapping("/deleteAllStudySubject")
     @ResponseBody
-    public String deleteAllStudySubject(@RequestParam("id") String id){
+    public String deleteAllStudySubject(@RequestParam("id") String id) {
         // 接收包含stuId的字符串，并将它分割成字符串数组
         String[] dssList = id.split(",");
         // 将字符串数组转为List<Intger> 类型
         List<Long> LString = new ArrayList<Long>();
-        for(String str : dssList){
+        for (String str : dssList) {
             DictStudySubject dss = studySubjectService.findById(Long.valueOf(id));
          /*   if (dep.getStudents()!=null&&dep.getTeachers()!=null&&dep.getCgClasses()!=null){
                 return "no";
@@ -528,10 +552,10 @@ public class AdminController {
     //搜索科目
     @GetMapping("/LikeStudySubject")
     @ResponseBody
-    public Map<String,Object> studySubject(Integer page, Integer limit,DictStudySubject studySubject){
+    public Map<String, Object> studySubject(Integer page, Integer limit, DictStudySubject studySubject) {
         page--;
-        Pageable pageable = PageRequest.of(page,limit);
-        List<DictStudySubject> content = studySubjectService.findAll(new Specification<DictStudySubject>(){
+        Pageable pageable = PageRequest.of(page, limit);
+        List<DictStudySubject> content = studySubjectService.findAll(new Specification<DictStudySubject>() {
             @Override
             public Predicate toPredicate(Root<DictStudySubject> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder cb) {
                 List<Predicate> list = new ArrayList<>();
@@ -543,57 +567,63 @@ public class AdminController {
                 criteriaQuery.where(list.toArray(pre));
                 return cb.and(list.toArray(pre));
             }
-        },pageable).getContent();
-        Map<String,Object> map = new HashMap<>();
-        map.put("data",content);
-        map.put("size",studySubjectService.findAllCount());
+        }, pageable).getContent();
+        Map<String, Object> map = new HashMap<>();
+        map.put("data", content);
+        map.put("size", studySubjectService.findAllCount());
         return map;
     }
 
     //缺席原因列表获取：页面
-    @GetMapping("/confirmResult")
+    @GetMapping("/evaluateItem")
     @ResponseBody
-    public Map<String,Object> confirmResult(Integer page, Integer limit){
+    public Map<String, Object> evaluateItem(Integer page, Integer limit) {
         page--;
-        Pageable pageable = PageRequest.of(page,limit);
-        List<DictConfirmResult> content = confirmResultService.findAll(pageable).getContent();
-        Map<String,Object> map = new HashMap<>();
-        map.put("data",content);
-        map.put("size", confirmResultService.findAllCount());
+        Pageable pageable = PageRequest.of(page, limit);
+        List<EvaluateItem> content = evaluateItemService.findAll(pageable).getContent();
+        Map<String, Object> map = new HashMap<>();
+        map.put("data", content);
+        map.put("size", evaluateItemService.findAllCount());
         return map;
     }
+
     //修改页面获取
-    @GetMapping("/editConfirmResult")
-    public ModelAndView toEditDepartment(Long id,Model model){
+    @GetMapping("/editEvaluateItem")
+    public ModelAndView toeditEvaluateItem(Long id, Model model) {
 
-        DictConfirmResult confirmResult = confirmResultService.findById(id);
-        model.addAttribute("confirmResult",confirmResult);
-        return new ModelAndView("admin/confirmResultForm.html","model",model);
+        EvaluateItem evaluateItem = evaluateItemService.findById(id);
+        model.addAttribute("evaluateItem", evaluateItem);
+        return new ModelAndView("admin/evaluateItemForm.html", "model", model);
     }
+
     //方法
-    @PostMapping("/editConfirmResult")
+    @PostMapping("/editEvaluateItem")
     @ResponseBody
-    public String editDepartment(DictConfirmResult confirmResult){
-        DictConfirmResult confirmResultNew = confirmResultService.findById(confirmResult.getId());
-        if (confirmResultNew.getConfirmResultName().equals(confirmResult.getConfirmResultName())){
-
-            if (confirmResultNew.getConfirmResultCode().equals(confirmResult.getConfirmResultCode())){
-                    return "noEdit";
+    public String editEvaluateItem(EvaluateItem evaluateItem) {
+        EvaluateItem evaluateItemNew = evaluateItemService.findById(evaluateItem.getId());
+        if (evaluateItemNew.getEvaluateName().equals(evaluateItem.getEvaluateName())) {
+            if (evaluateItemNew.getOptionA().equals(evaluateItem.getOptionA())) {
+                if (evaluateItemNew.getOptionB().equals(evaluateItem.getOptionB())) {
+                    if (evaluateItemNew.getOptionC().equals(evaluateItem.getOptionC())) {
+                        return "noEdit";
+                    }
+                }
             }
-
-            confirmResultNew.setConfirmResultName(confirmResult.getConfirmResultName());
-            confirmResultNew.setConfirmResultCode(confirmResult.getConfirmResultCode());
-            confirmResultService.saveOne(confirmResultNew);
+            evaluateItemNew.setEvaluateName(evaluateItem.getEvaluateName());
+            evaluateItemNew.setOptionA(evaluateItem.getOptionA());
+            evaluateItemNew.setOptionB(evaluateItem.getOptionB());
+            evaluateItemNew.setOptionC(evaluateItem.getOptionC());
+            evaluateItemService.saveOne(evaluateItemNew);
             return "ok";
-        }
-        else {
-            if (confirmResultService.findOneByName(confirmResult.getConfirmResultName()) != null) {
+        } else {
+            if (evaluateItemService.findOneByName(evaluateItem.getEvaluateName()) == null) {
                 return "equals";
-            }
-            else {
-                confirmResultNew.setConfirmResultName(confirmResult.getConfirmResultName());
-                confirmResultNew.setConfirmResultCode(confirmResult.getConfirmResultCode());
-                confirmResultService.saveOne(confirmResultNew);
+            } else {
+                evaluateItemNew.setEvaluateName(evaluateItem.getEvaluateName());
+                evaluateItemNew.setOptionA(evaluateItem.getOptionA());
+                evaluateItemNew.setOptionB(evaluateItem.getOptionB());
+                evaluateItemNew.setOptionC(evaluateItem.getOptionC());
+                evaluateItemService.saveOne(evaluateItemNew);
                 return "ok";
             }
         }
@@ -601,109 +631,110 @@ public class AdminController {
     }
 
     //添加缺席原因的界面
-    @GetMapping("/addConfirmResult")
-    public ModelAndView addDepartment(Model model){
-
-        return new ModelAndView("admin/confirmResultAdd.html","model",model);
+    @GetMapping("/addEvaluateItem")
+    public ModelAndView addEvaluateItem(Model model) {
+        return new ModelAndView("admin/evaluateItemAdd.html", "model", model);
     }
 
 
     //添加缺席原因的方法
-    @PostMapping("/addConfirmResult")
+    @PostMapping("/addEvaluateItem")
     @ResponseBody
-    public String addConfirmResult(DictConfirmResult confirmResult){
-        if (confirmResultService.findOneByName(confirmResult.getConfirmResultName())!=null){
+    public String addEvaluateItem(EvaluateItem evaluateItem) {
+        if (evaluateItemService.findOneByName(evaluateItem.getEvaluateName()) != null) {
             return "equals";
         }
         try {
-            confirmResultService.saveOne(confirmResult);
+            evaluateItemService.saveOne(evaluateItem);
             return "ok";
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             return "no";
         }
     }
 
     //单个删除
-    @GetMapping("/deleteConfirmResult")
+    @GetMapping("/deleteEvaluateItem")
     @ResponseBody
-    public String deleteConfirmResult(int id){
-        DictConfirmResult dcr = confirmResultService.findById(Long.valueOf(id));
+    public String deleteEvaluateItem(int id) {
+        EvaluateItem ei = evaluateItemService.findById(Long.valueOf(id));
         /*if (dcr.getStudents()!=null&&dcr.getTeachers()!=null&&dcr.getCgClasses()!=null){
             return "no";
         }*/
-        confirmResultService.deleteConfirmResult(id);
+        evaluateItemService.deleteEvaluateItem(id);
         return "no";
     }
+
     //多个删除
-    @GetMapping("/deleteAllConfirmResult")
+    @GetMapping("/deleteAllEvaluateItem")
     @ResponseBody
-    public String deleteAllConfirmResult(@RequestParam("id") String id){
+    public String deleteAllEvaluateItem(@RequestParam("id") String id) {
         // 接收包含stuId的字符串，并将它分割成字符串数组
         String[] dcrList = id.split(",");
         // 将字符串数组转为List<Intger> 类型
         List<Long> LString = new ArrayList<Long>();
-        for(String str : dcrList){
-            DictConfirmResult dep = confirmResultService.findById(Long.valueOf(id));
+        for (String str : dcrList) {
+            EvaluateItem ei = evaluateItemService.findById(Long.valueOf(id));
             /*if (dep.getStudents()!=null&&dep.getTeachers()!=null&&dep.getCgClasses()!=null){
                 return "no";
             }*/
             LString.add(new Long(str));
         }
         // 调用service层的批量删除函数
-        confirmResultService.deleteAllConfirmResult(LString);
+        evaluateItemService.deleteAllEvaluateItem(LString);
         return "ok";
     }
 
 
-    //搜索缺席原因
-    @GetMapping("/LikeConfirmResult")
+    //搜索评价选项
+    @GetMapping("/LikeEvaluateItem")
     @ResponseBody
-    public Map<String,Object> department(Integer page, Integer limit,DictConfirmResult confirmResult){
+    public Map<String, Object> department(Integer page, Integer limit, EvaluateItem evaluateItem) {
         page--;
-        Pageable pageable = PageRequest.of(page,limit);
-        List<DictConfirmResult> content = confirmResultService.findAll(new Specification<DictConfirmResult>(){
+        Pageable pageable = PageRequest.of(page, limit);
+        List<EvaluateItem> content = evaluateItemService.findAll(new Specification<EvaluateItem>() {
             @Override
-            public Predicate toPredicate(Root<DictConfirmResult> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder cb) {
+            public Predicate toPredicate(Root<EvaluateItem> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder cb) {
                 List<Predicate> list = new ArrayList<>();
                 //根据dptName 模糊查询Department
-                if (StringUtils.isNotBlank(confirmResult.getConfirmResultName())) {
-                    list.add(cb.like(root.get("ConfirmResultName").as(String.class), "%" + confirmResult.getConfirmResultName() + "%"));
+                if (StringUtils.isNotBlank(evaluateItem.getEvaluateName())) {
+                    list.add(cb.like(root.get("evaluateName").as(String.class), "%" + evaluateItem.getEvaluateName() + "%"));
                 }
                 Predicate[] pre = new Predicate[list.size()];
                 criteriaQuery.where(list.toArray(pre));
                 return cb.and(list.toArray(pre));
             }
-        },pageable).getContent();
-        Map<String,Object> map = new HashMap<>();
-        map.put("data",content);
-        map.put("size", confirmResultService.findAllCount());
+        }, pageable).getContent();
+        Map<String, Object> map = new HashMap<>();
+        map.put("data", content);
+        map.put("size", evaluateItemService.findAllCount());
         return map;
     }
 
     //区县列表获取
     @GetMapping("/district")
     @ResponseBody
-    public Map<String,Object> course(Integer page, Integer limit){
+    public Map<String, Object> course(Integer page, Integer limit) {
         page--;
-        Pageable pageable = PageRequest.of(page,limit);
+        Pageable pageable = PageRequest.of(page, limit);
         List<DictDistrict> content = districtService.findAll(pageable).getContent();
-        Map<String,Object> map = new HashMap<>();
-        map.put("data",content);
-        map.put("size",districtService.findAllCount());
+        Map<String, Object> map = new HashMap<>();
+        map.put("data", content);
+        map.put("size", districtService.findAllCount());
         return map;
     }
+
     //修改区县列表页面
     @GetMapping("/editDistrict")
-    public ModelAndView toEditDistrict(Long id,Model model){
+    public ModelAndView toEditDistrict(Long id, Model model) {
         DictDistrict district = districtService.findById(id);
-        model.addAttribute("district",district);
-        return new ModelAndView("admin/districtForm.html","model",model);
+        model.addAttribute("district", district);
+        return new ModelAndView("admin/districtForm.html", "model", model);
     }
+
     //方法
     @PostMapping("/editDistrict")
     @ResponseBody
-    public String editDistrict(DictDistrict district){
+    public String editDistrict(DictDistrict district) {
 
 
         DictDistrict districtNew = districtService.findById(district.getId());
@@ -713,47 +744,49 @@ public class AdminController {
         districtService.saveOne(districtNew);
         return "ok";
     }
+
     //添加区县的界面
     @GetMapping("/addDistrict")
-    public ModelAndView addDistrict(Model model){
-        return new ModelAndView("admin/addDistrict.html","model",model);
+    public ModelAndView addDistrict(Model model) {
+        return new ModelAndView("admin/addDistrict.html", "model", model);
     }
 
     //添加区县的方法
     @PostMapping("/addDistrict")
     @ResponseBody
-    public String addDistrict(DictDistrict district){
-        if (districtService.findOneByName(district.getDistrictName())!=null){
+    public String addDistrict(DictDistrict district) {
+        if (districtService.findOneByName(district.getDistrictName()) != null) {
             return "equals";
         }
         try {
             districtService.saveOne(district);
             return "ok";
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             return "no";
         }
     }
+
     //删除单个
     @GetMapping("/deleteDistrict")
     @ResponseBody
-    public int deleteDistrict(int id){
-        int i =districtService.deleteDistrict(id);
-        System.out.println("======"+id);
+    public int deleteDistrict(int id) {
+        int i = districtService.deleteDistrict(id);
+        System.out.println("======" + id);
         return i;
     }
+
     //删除多个
     @GetMapping("/deleteAllDistrict")
     @ResponseBody
-    public int deleteAllDistrict(@RequestParam("id") String id){
+    public int deleteAllDistrict(@RequestParam("id") String id) {
         // 接收包含stuId的字符串，并将它分割成字符串数组
         String[] disList = id.split(",");
         // 将字符串数组转为List<Intger> 类型
         List<Long> LString = new ArrayList<Long>();
-        for(String str : disList){
+        for (String str : disList) {
             LString.add(new Long(str));
         }
-        System.out.println("====="+LString);
+        System.out.println("=====" + LString);
         // 调用service层的批量删除函数
         int i = districtService.deleteAllDistrict(LString);
         return i;
@@ -763,10 +796,10 @@ public class AdminController {
     //搜索区县
     @GetMapping("/LikeDistrict")
     @ResponseBody
-    public Map<String,Object> course(Integer page, Integer limit,DictDistrict district){
+    public Map<String, Object> course(Integer page, Integer limit, DictDistrict district) {
         page--;
-        Pageable pageable = PageRequest.of(page,limit);
-        List<DictDistrict> content = districtService.findAll(new Specification<DictDistrict>(){
+        Pageable pageable = PageRequest.of(page, limit);
+        List<DictDistrict> content = districtService.findAll(new Specification<DictDistrict>() {
             @Override
             public Predicate toPredicate(Root<DictDistrict> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder cb) {
                 List<Predicate> list = new ArrayList<>();
@@ -778,10 +811,10 @@ public class AdminController {
                 criteriaQuery.where(list.toArray(pre));
                 return cb.and(list.toArray(pre));
             }
-        },pageable).getContent();
-        Map<String,Object> map = new HashMap<>();
-        map.put("data",content);
-        map.put("size",districtService.findAllCount());
+        }, pageable).getContent();
+        Map<String, Object> map = new HashMap<>();
+        map.put("data", content);
+        map.put("size", districtService.findAllCount());
         return map;
     }
 
@@ -789,43 +822,45 @@ public class AdminController {
     //考点列表获取
     @GetMapping("/examSite")
     @ResponseBody
-    public Map<String,Object> examSite(Integer page, Integer limit){
+    public Map<String, Object> examSite(Integer page, Integer limit) {
         page--;
-        Pageable pageable = PageRequest.of(page,limit);
+        Pageable pageable = PageRequest.of(page, limit);
         List<ExamSite> content = examSiteService.findAll(pageable).getContent();
         System.out.println(content);
-        Map<String,Object> map = new HashMap<>();
-        for (ExamSite s:content
+        Map<String, Object> map = new HashMap<>();
+        /*for (ExamSite s:content
         ) {
             s.setDistrictName(s.getDistrict().getDistrictName());
-        }
-        map.put("data",content);
-        map.put("size",examSiteService.findAllCount());
+        }*/
+        map.put("data", content);
+        map.put("size", examSiteService.findAllCount());
         return map;
     }
+
     //修改考点信息：页面
     @GetMapping("/editExamSite")
-    public ModelAndView editExamSite(Long id,Model model){
+    public ModelAndView editExamSite(Long id, Model model) {
         ExamSite examSite = examSiteService.findById(id);
         List<DictDistrict> districtList = districtService.findAllList();
-        model.addAttribute("district",examSite.getDistrict().getDistrictName());
-        model.addAttribute("examSite",examSite);
-        model.addAttribute("districtList",districtList);
-        return new ModelAndView("admin/examSiteForm.html","model",model);
+        model.addAttribute("district", examSite.getDistrict());
+        model.addAttribute("examSite", examSite);
+        model.addAttribute("districtList", districtList);
+        return new ModelAndView("admin/examSiteForm.html", "model", model);
     }
+
     //修改考点方法
     @PostMapping("/editExamSite")
     @ResponseBody
-    public String editExamSite(ExamSite examSite,Long district){
+    public String editExamSite(ExamSite examSite, Long district) {
         ExamSite examSiteNew = examSiteService.findById(examSite.getId());
 
 
         if (examSiteNew.getExamSiteName().equals(examSite.getExamSiteName())) {
-            if (examSiteNew.getPrincipal().equals(examSite.getPrincipal())){
-                if (examSiteNew.getPrnTel().equals(examSite.getPrnTel())){
-                        if (examSiteNew.getDistrict().getDistrictName().equals(examSite.getDistrict().getDistrictName())){
-                            return "noEdit";
-                        }
+            if (examSiteNew.getPrincipal().equals(examSite.getPrincipal())) {
+                if (examSiteNew.getPrnTel().equals(examSite.getPrnTel())) {
+                    if (examSiteNew.getDistrict().equals(examSite.getDistrict())) {
+                        return "noEdit";
+                    }
                 }
             }
 
@@ -833,7 +868,7 @@ public class AdminController {
             examSiteNew.setExamSiteName(examSite.getExamSiteName());
             examSiteNew.setPrincipal(examSite.getPrincipal());
             examSiteNew.setPrnTel(examSite.getPrnTel());
-            examSiteNew.setDistrict(districtService.findById(district));
+            examSiteNew.setDistrict(examSite.getDistrict());
             examSiteService.saveOne(examSiteNew);
             return "ok";
         } else {
@@ -843,82 +878,83 @@ public class AdminController {
                 examSiteNew.setExamSiteName(examSite.getExamSiteName());
                 examSiteNew.setPrincipal(examSite.getPrincipal());
                 examSiteNew.setPrnTel(examSite.getPrnTel());
-                examSiteNew.setDistrict(districtService.findById(district));
+                examSiteNew.setDistrict(examSite.getDistrict());
                 examSiteService.saveOne(examSiteNew);
                 return "ok";
             }
 
         }
     }
+
     //添加考点的界面
     @GetMapping("/addExamSite")
-    public ModelAndView addExamSite(Model model){
+    public ModelAndView addExamSite(Model model) {
 
         List<DictDistrict> districtList = districtService.findAllList();
-        model.addAttribute("districtList",districtList);
+        model.addAttribute("districtList", districtList);
 
 
-        return new ModelAndView("admin/examSiteAdd.html","model",model);
+        return new ModelAndView("admin/examSiteAdd.html", "model", model);
     }
 
 
     //添加考点的方法
     @PostMapping("/addExamSite")
     @ResponseBody
-    public String addExamSite(ExamSite examSite ,Long district){
+    public String addExamSite(ExamSite examSite, Long district) {
         //判断工号是否存在
 
-        if (examSiteService.findOneByName(examSite.getExamSiteName())!=null){
+        if (examSiteService.findOneByName(examSite.getExamSiteName()) != null) {
             return "equals";
         }
         examSite.setExamSiteName(examSite.getExamSiteName());
         examSite.setPrincipal(examSite.getPrincipal());
         examSite.setPrnTel(examSite.getPrnTel());
-        examSite.setDistrict(districtService.findById(district));
+        examSite.setDistrict(examSite.getDistrict());
         try {
             examSiteService.saveOne(examSite);
             return "ok";
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             return "no";
         }
 
 
     }
+
     //删除单个考点
     @GetMapping("/deleteExamSite")
     @ResponseBody
-    public int deleteExamSite(int id){
-        int i =examSiteService.deleteExamSite(id);
-        System.out.println("======"+id);
+    public int deleteExamSite(int id) {
+        int i = examSiteService.deleteExamSite(id);
+        System.out.println("======" + id);
         return i;
     }
-    //删除多个教师
+
+    //删除多个考点
     @GetMapping("/deleteAllExamSite")
     @ResponseBody
-    public int deleteAllExamSite(@RequestParam("id") String id){
+    public int deleteAllExamSite(@RequestParam("id") String id) {
         // 接收包含stuId的字符串，并将它分割成字符串数组
         String[] exaList = id.split(",");
         // 将字符串数组转为List<Intger> 类型
         List<Long> LString = new ArrayList<Long>();
-        for(String str : exaList){
+        for (String str : exaList) {
             LString.add(new Long(str));
         }
-        System.out.println("====="+LString);
+        System.out.println("=====" + LString);
         // 调用service层的批量删除函数
         int i = examSiteService.deleteAllExamSite(LString);
         return i;
     }
 
 
-
-    //搜索老师
+    //搜索考点
     @GetMapping("/LikeExamSite")
     @ResponseBody
-    public Map<String,Object> examSite(Integer page, Integer limit,ExamSite examSite){
+    public Map<String, Object> examSite(Integer page, Integer limit, ExamSite examSite) {
         page--;
-        Pageable pageable = PageRequest.of(page,limit);
-        List<ExamSite> content = examSiteService.findAll(new Specification<ExamSite>(){
+        Pageable pageable = PageRequest.of(page, limit);
+        List<ExamSite> content = examSiteService.findAll(new Specification<ExamSite>() {
             @Override
             public Predicate toPredicate(Root<ExamSite> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder cb) {
                 List<Predicate> list = new ArrayList<>();
@@ -928,28 +964,490 @@ public class AdminController {
                 }
                 //根据teacherNumber 查询ExamSite
                 if (StringUtils.isNotBlank(examSite.getPrincipal())) {
-                    list.add(cb.like(root.get("principal").as(String.class),"%" +  examSite.getPrincipal()+ "%"));
+                    list.add(cb.like(root.get("principal").as(String.class), "%" + examSite.getPrincipal() + "%"));
                 }
                 //根据dptName 查询teacher
-                if (StringUtils.isNotBlank(examSite.getDistrictName())) {
-                    Join<DictDistrict, ExamSite> join = root.join("district", JoinType.LEFT);
-                    list.add(cb.like(join.get("districtName"),"%"+ examSite.getExamSiteName()+ "%"));
+                if (StringUtils.isNotBlank(examSite.getDistrict())) {
+                    ;
+                    list.add(cb.like(root.get("district").as(String.class), "%" + examSite.getDistrict() + "%"));
                 }
                 Predicate[] pre = new Predicate[list.size()];
                 criteriaQuery.where(list.toArray(pre));
                 return cb.and(list.toArray(pre));
             }
-        },pageable).getContent();
-        Map<String,Object> map = new HashMap<>();
-        for (ExamSite t:content
-        ) {
-            t.setDistrictName(t.getDistrict().getDistrictName());
-        }
-        map.put("data",content);
-        map.put("size",examSiteService.findAllCount());
+        }, pageable).getContent();
+        Map<String, Object> map = new HashMap<>();
+        map.put("data", content);
+        map.put("size", examSiteService.findAllCount());
         return map;
     }
 
+    //考试列表获取
+    @GetMapping("/exam")
+    @ResponseBody
+    public Map<String, Object> exam(Integer page, Integer limit) {
+        page--;
+        //获取当前时间
+        Date date = new Date();
+        Pageable pageable = PageRequest.of(page, limit);
+        List<Exam> content = examService.findAll(pageable).getContent();
+        Map<String, Object> map = new HashMap<>();
+        for (Exam s : content
+        ) {
+            s.setExamSiteName(s.getExamSite().getExamSiteName());
+            Timestamp starTime=s.getStarTime();
+            Timestamp endTime=s.getEndTime();
+            Timestamp nowTime = new Timestamp(date.getTime());
+            if (starTime.before(nowTime)) {//starTime时间比nowTime时间早,考试开始
+                if (endTime.before(nowTime)){//true:考试结束
+                    examService.updateState(4, s.getId());//state:4代表考试结束
+                    examinerService.updateState("正常",s.getId());//修改考官状态为正常
+                    System.out.println("结束时间"+endTime);
+                    System.out.println("现在"+nowTime);
+                }else {
+                    examService.updateState(3, s.getId());//state:3代表正在考试
+                    examinerService.updateState("正在监考",s.getId());//修改考官状态为正在监考
+                    System.out.println("开始时间"+starTime);
+                    System.out.println("现在"+nowTime);
+                    System.out.println("结束时间"+endTime);
+                }
+            }
+        }
+        map.put("data", content);
+        map.put("size", examService.findAllCount());
+        return map;
+    }
+
+    //修改考试列表页面
+    @GetMapping("/editExam")
+    public ModelAndView toeditExam(Long id, Model model) {
+
+        List<ExamSite> examSiteList = examSiteService.findAllList();
+        List<DictStudySubject> studySubjectList = studySubjectService.findAllList();
+        List<DictExamType> examTypeList = examTypeService.findAllList();
+        Exam exam = examService.findById(id);
+        model.addAttribute("studySubject",exam.getStudySubject());
+        model.addAttribute("examSite",exam.getExamSite().getExamSiteName());
+        model.addAttribute("examType",exam.getExamType());
+        System.out.println(exam.getExamSite().getExamSiteName());
+        System.out.println(exam.getExamType());
+        model.addAttribute("exam", exam);
+        model.addAttribute("examSiteList", examSiteList);
+        model.addAttribute("studySubjectList", studySubjectList);
+        model.addAttribute("examTypeList", examTypeList);
+        return new ModelAndView("admin/examForm.html", "model", model);
+    }
+
+    //修改考试方法
+    @PostMapping("/editExam")
+    @ResponseBody
+    public String editExam(Exam exam, Long examSite) {
+        Exam examNew = examService.findById(exam.getId());
+
+        if (examNew.getExamName().equals(exam.getExamName())) {
+            if (examNew.getExamCode().equals(exam.getExamCode())) {
+                if (examNew.getStudySubject().equals(exam.getStudySubject())) {
+                    if (examNew.getExamType().equals(exam.getExamType())) {
+                        if (examNew.getStarTime().equals(exam.getStarTime())) {
+                            if (examNew.getEndTime().equals(exam.getEndTime())) {
+                                if (examNew.getExamSite().getExamSiteName().equals(exam.getExamSite().getExamSiteName())) {
+                                    return "noEdit";
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
 
+            examNew.setExamName(exam.getExamName());
+            examNew.setExamCode(exam.getExamCode());
+            examNew.setStudySubject(exam.getStudySubject());
+            examNew.setExamType(exam.getExamType());
+            examNew.setStarTime(exam.getStarTime());
+            examNew.setEndTime(exam.getEndTime());
+            examNew.setExamSite(examSiteService.findById(examSite));
+            examService.saveOne(examNew);
+            return "ok";
+        } else {
+            if (examSiteService.findOneByName(exam.getExamSiteName()) != null) {
+                return "equals";
+            } else {
+                examNew.setExamName(exam.getExamName());
+                examNew.setExamCode(exam.getExamCode());
+                examNew.setStudySubject(exam.getStudySubject());
+                examNew.setExamType(exam.getExamType());
+                examNew.setStarTime(exam.getStarTime());
+                examNew.setEndTime(exam.getEndTime());
+                examNew.setExamSite(examSiteService.findById(examSite));
+                examService.saveOne(examNew);
+                return "ok";
+            }
+
+        }
+    }
+
+    //添加考试的界面
+    @GetMapping("/addExam")
+    public ModelAndView addExam(Model model) {
+
+        List<ExamSite> examSiteList = examSiteService.findAllList();
+        List<DictStudySubject> studySubjectList = studySubjectService.findAllList();
+        List<DictExamType> examTypeList = examTypeService.findAllList();
+        model.addAttribute("examSiteList", examSiteList);
+        model.addAttribute("studySubjectList", studySubjectList);
+        model.addAttribute("examTypeList", examTypeList);
+
+        return new ModelAndView("admin/examAdd.html", "model", model);
+    }
+
+    //添加考试的方法
+    @PostMapping("/addExam")
+    @ResponseBody
+    public String addExam(Exam exam) {
+        //判断工号是否存在
+
+        if (examService.findOneByName(exam.getExamName()) != null) {
+            return "equals";
+        }
+        /*exam.setExamName(exam.getExamName());
+        exam.setExamCode(exam.getExamCode());
+        exam.setStarTime(exam.getEndTime());
+        exam.setEndTime(exam.getEndTime());
+        exam.setExamSite(examSiteService.findById(examSite));*/
+        try {
+            examService.saveOne(exam);
+            return "ok";
+        } catch (Exception e) {
+            return "no";
+        }
+
+
+    }
+    //java计时器时间到自动结束考试
+    //结束考试
+
+    //删除单个
+    @GetMapping("/deleteExam")
+    @ResponseBody
+    public int deleteExam(int id) {
+        int i = examService.deleteExam(id);
+        System.out.println("======" + id);
+        return i;
+    }
+
+    //删除多个
+    @GetMapping("/deleteAllExam")
+    @ResponseBody
+    public int deleteAllExam(@RequestParam("id") String id) {
+        // 接收包含stuId的字符串，并将它分割成字符串数组
+        String[] exaList = id.split(",");
+        // 将字符串数组转为List<Intger> 类型
+        List<Long> LString = new ArrayList<Long>();
+        for (String str : exaList) {
+            LString.add(new Long(str));
+        }
+        System.out.println("=====" + LString);
+        // 调用service层的批量删除函数
+        int i = examService.deleteAllExam(LString);
+        return i;
+    }
+
+
+    //搜索考试
+    @GetMapping("/LikeExam")
+    @ResponseBody
+    public Map<String, Object> exam(Integer page, Integer limit, Exam exam) {
+        page--;
+        Pageable pageable = PageRequest.of(page, limit);
+        List<Exam> content = examService.findAll(new Specification<Exam>() {
+            @Override
+            public Predicate toPredicate(Root<Exam> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder cb) {
+                List<Predicate> list = new ArrayList<>();
+                //根据dptName 模糊查询Department
+                if (StringUtils.isNotBlank(exam.getExamName())) {
+                    list.add(cb.like(root.get("courseName").as(String.class), "%" + exam.getExamName() + "%"));
+                }
+                Predicate[] pre = new Predicate[list.size()];
+                criteriaQuery.where(list.toArray(pre));
+                return cb.and(list.toArray(pre));
+            }
+        }, pageable).getContent();
+        Map<String, Object> map = new HashMap<>();
+        map.put("data", content);
+        map.put("size", examService.findAllCount());
+        return map;
+    }
+
+    //考官智能分配
+    @GetMapping("/smartDistribution")
+    @ResponseBody
+    public String distributionExaminer(Model model, Long id) {
+        Exam exams = examService.findById(id);
+        String examType=examService.findExamType(id).getExamType();
+        String district=exams.getExamSite().getDistrict();
+        String subjectName= exams.getStudySubject();
+        List<Examiner> examiners = examinerService.findExaminerBy(examType,district,subjectName);
+        System.out.println(examiners.size());
+        System.out.println(examiners);
+        if (examiners.size()==0){//判断符合条件的考官数量是否等于0
+            return "no";
+        }else if (examinerService.findAllCountViewExaminer(id) < examService.findQuantity(id).getQuantity() && examinerService.findAllCountViewExaminer(id) != 0) {//符合条件考官不等于0，判断对应考试是否已经分配过考官
+            int v = examService.findQuantity(id).getQuantity() - examinerService.findAllCountViewExaminer(id);
+            System.out.println(v);
+            if (examiners.size() <= v && examiners.size()!=0){
+                String ids = "";
+                int i = 0;
+                for (Examiner e : examiners) {
+                    examinerService.updateExamId(id, e.getId());
+                    i++;
+                }
+                //考官不够的怎么办？
+                int j = v - i;
+                List<Examiner> examiners1 = examinerService.findExaminerByRandom(examService.findExamType(id).getExamType(), exams.getStudySubject());
+                if (examiners1.size() < j) {
+                    return "no";
+                } else {
+                    int s = 1;
+                    for (Examiner eList : examiners1) {
+                        examinerService.updateExamId(id, eList.getId());
+                        if (s == j) {
+                            break;
+                        }
+                        s++;
+                    }
+                }
+                //String ss=ids.substring(0,ids.length()-1);//当循环结束后截取最后一个逗号
+                System.out.println("看看" + i);
+                //examService.updateExaminer(ss,id);
+            } else {
+                int i = 1;
+                for (Examiner e : examiners) {
+                    //ids=ids+e.getId()+",";//for循环id组成一条用逗号隔开的字符串输出
+                    examinerService.updateExamId(id, e.getId());
+                    if (i == v) {
+                        break;
+                    }
+                    i++;
+                }
+            }
+            examService.updateState(1, id);//state:1代表考官分配完成
+        } else if (examiners.size() <= examService.findQuantity(id).getQuantity()) {//符合条件考官不等于0，没有分配过走这边，且考官数量小于需求数量的。
+            String ids = "";
+            int i = 0;
+            for (Examiner e : examiners) {
+                //System.out.println(e.getId());
+                //String ids=e.getId().toString();
+                //ids=ids+e.getId()+",";//for循环id组成一条用逗号隔开的字符串输出
+                examinerService.updateExamId(id, e.getId());
+                i++;
+                //System.out.println("看看"+ids);
+                //String ids=StringUtils.join(e.getId(), ",");
+                //examService.updateExaminer(ids,id);
+            }
+            //考官不够的怎么办？
+            int j = examService.findQuantity(id).getQuantity() - i;
+            List<Examiner> examiners1 = examinerService.findExaminerByRandom(examService.findExamType(id).getExamType(), exams.getStudySubject());
+            if (examiners1.size() < j) {
+                return "no";
+            } else {
+                int s = 1;
+                for (Examiner eList : examiners1) {
+                    examinerService.updateExamId(id, eList.getId());
+                    if (s == j) {
+                        break;
+                    }
+                    s++;
+                }
+            }
+            //String ss=ids.substring(0,ids.length()-1);//当循环结束后截取最后一个逗号
+            System.out.println("看看" + i);
+            //examService.updateExaminer(ss,id);
+        } else {//没有分配过考官数量满足需求数量的额
+            int i = 1;
+            for (Examiner e : examiners) {
+                examinerService.updateExamId(id, e.getId());
+                if (i == examService.findQuantity(id).getQuantity()) {
+                    break;
+                }
+                i++;
+            }
+            System.out.println(i);
+        }
+        examService.updateState(1, id);//state:1代表考官分配完成
+
+        return "ok";
+    }
+
+    //考官手动分配
+    @GetMapping("/manualExaminerPage")
+    public ModelAndView manualExaminer(Long id, Model model) {
+        Exam exam = examService.findById(id);
+        model.addAttribute("exam", exam);
+        return new ModelAndView("admin/manualExaminer-list.html", "model", model);
+    }
+
+    //手动分配考官列表
+    @GetMapping("/manualExaminer")
+    @ResponseBody
+    public Map<String, Object> manualExaminer(Long id, Integer page, Integer limit) {
+        page--;
+        Pageable pageable = PageRequest.of(page, limit);
+        List<Examiner> content = examinerService.findExaminer(pageable).getContent();
+        Map<String, Object> map = new HashMap<>();
+        map.put("data", content);
+        map.put("size", examinerService.findAllCountExaminer());
+        return map;
+    }
+
+    //手动分配多个
+    @GetMapping("/manualAllExaminer")
+    @ResponseBody
+    public int manualAllExaminer(Long id, @RequestParam("ids") String ids) {
+        // 接收包含examinerId的字符串，并将它分割成字符串数组
+        String[] exaList = ids.split(",");
+        // 将字符串数组转为List<Intger> 类型
+        List<Long> LString = new ArrayList<Long>();
+        for (String str : exaList) {
+            LString.add(new Long(str));
+        }
+        System.out.println("=====" + LString);
+        // 调用service层的批量删除函数
+        int i = examinerService.updateManualExamId(id, LString);
+        examService.updateState(1, id);//state:1代表考官分配完成
+        return i;
+    }
+
+    //分配的考官页面获取
+    @GetMapping("/viewExaminerPage")
+    public ModelAndView viewExaminerPage(Long id, Model model) {
+        Exam exam = examService.findById(id);
+        model.addAttribute("exam", exam);
+        System.out.println(id);
+        return new ModelAndView("admin/viewExaminer-list.html", "model", model);
+    }
+
+    //分配的考官
+    @GetMapping("/viewExaminer")
+    @ResponseBody
+    public Map<String, Object> viewExaminer(Long id, Integer page, Integer limit) {
+        page--;
+        Pageable pageable = PageRequest.of(page, limit);
+        List<Examiner> content = examinerService.findViewExaminer(id, pageable).getContent();
+        Map<String, Object> map = new HashMap<>();
+        /*for (Examiner s:content
+        ) {
+            s.setDistrictName(s.getDistrict().getDistrictName());
+        }*/
+        map.put("data", content);
+        map.put("size", examinerService.findAllCountViewExaminer(id));
+        return map;
+    }
+
+    //删除单个分配考官
+    @PostMapping("/deleteViewExaminer")
+    @ResponseBody
+    public int deleteViewExaminer(Long id, int ids) {
+        int i = examinerService.deleteViewExaminer("缺席",ids);
+        System.out.println("======" + id);
+        examService.updateState(2, id);
+        return i;
+    }
+
+    //删除多个分配考官
+    @PostMapping("/deleteAllViewExaminer")
+    @ResponseBody
+    public int deleteAllViewExaminer(@RequestParam("id") Long id, @RequestParam("ids") String ids) {
+        // 接收包含stuId的字符串，并将它分割成字符串数组
+        String[] stuList = ids.split(",");
+        // 将字符串数组转为List<Intger> 类型
+        List<Long> LString = new ArrayList<Long>();
+        for (String str : stuList) {
+            LString.add(new Long(str));
+        }
+        System.out.println("=====" + LString);
+        // 调用service层的批量删除函数
+        int i = examinerService.deleteAllViewExaminer("缺席",LString);
+        examService.updateState(2, id);//state:2表示分配了考官 ，但有的来不到
+        return i;
+    }
+
+
+    //考官状态查询
+    @GetMapping("/examinerStatus")
+    @ResponseBody
+    public Map<String, Object> examinerStatus(Integer page, Integer limit) {
+        page--;
+        Pageable pageable = PageRequest.of(page, limit);
+        List<Examiner> content = examinerService.findAll(pageable).getContent();
+        Map<String, Object> map = new HashMap<>();
+        /*for (Examiner s:content
+        ) {
+            s.setDistrictName(s.getDistrict().getDistrictName());
+        }*/
+        map.put("data", content);
+        map.put("size", examinerService.findAllCount());
+        return map;
+    }
+//查看评价结果
+
+    /*//结束考试列表获取
+    @GetMapping("/evaluationExam")
+    @ResponseBody
+    public Map<String, Object> evaluationExam(Integer page, Integer limit) {
+        page--;
+        //获取当前时间
+        Pageable pageable = PageRequest.of(page, limit);
+        List<Exam> content = examService.findAllEvaluation(pageable).getContent();
+        Map<String, Object> map = new HashMap<>();
+        for (Exam s : content
+        ) {
+            s.setExamSiteName(s.getExamSite().getExamSiteName());
+        }
+        map.put("data", content);
+        map.put("size", examService.findAllEvaluationCount());
+        return map;
+    }*/
+
+    @GetMapping("/evaluationRecording")
+    @ResponseBody
+    public Map<String, Object> evaluationRecording(Integer page, Integer limit) {
+        page--;
+        //获取当前时间
+        Pageable pageable = PageRequest.of(page, limit);
+        List<EvaluationRecording> content = evaluationRecordingService.findAllEvaluationRecording(pageable).getContent();
+        Map<String, Object> map = new HashMap<>();
+        map.put("data", content);
+        map.put("size", evaluationRecordingService.findAllCount());
+        return map;
+
+    }
+
+    //搜索评价结果
+    @GetMapping("/LikeEvaluationRecording")
+    @ResponseBody
+    public Map<String, Object> LikeEvaluationRecording(Integer page, Integer limit, EvaluationRecording evaluationRecording) {
+        page--;
+        Pageable pageable = PageRequest.of(page, limit);
+        List<EvaluationRecording> content = evaluationRecordingService.findAll(new Specification<EvaluationRecording>() {
+            @Override
+            public Predicate toPredicate(Root<EvaluationRecording> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder cb) {
+                List<Predicate> list = new ArrayList<>();
+                //根据dptName 模糊查询Department
+                if (StringUtils.isNotBlank(evaluationRecording.getPrincipal())) {
+                    list.add(cb.like(root.get("principal").as(String.class), "%" + evaluationRecording.getPrincipal() + "%"));
+                }
+                if (StringUtils.isNotBlank(evaluationRecording.getExaminer())) {
+                    list.add(cb.like(root.get("examiner").as(String.class), "%" + evaluationRecording.getExaminer() + "%"));
+                }
+                Predicate[] pre = new Predicate[list.size()];
+                criteriaQuery.where(list.toArray(pre));
+                return cb.and(list.toArray(pre));
+            }
+        }, pageable).getContent();
+        Map<String, Object> map = new HashMap<>();
+        map.put("data", content);
+        map.put("size", evaluationRecordingService.findAllCount());
+        return map;
+    }
 }

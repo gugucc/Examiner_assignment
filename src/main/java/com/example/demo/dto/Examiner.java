@@ -1,7 +1,6 @@
 package com.example.demo.dto;
 
 import cn.afterturn.easypoi.excel.annotation.Excel;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import javax.persistence.*;
 
@@ -23,7 +22,7 @@ public class Examiner {
     @Excel(name = "学段",orderNum = "5")
     private String examType;//学段
     @Excel(name = "学科代码",orderNum = "6")
-    private String subjectName;//学科代码
+    private String subjectName;//学科
     @Excel(name = "单位名称",orderNum = "7")
     private String companyName;//单位名称
     @Excel(name = "职务职称",orderNum = "8")
@@ -43,9 +42,9 @@ public class Examiner {
     private String district;//考官所属区县
     @Excel(name = "状态",orderNum = "14")
     private String state;//状态
-    @Transient//禁止此字段对应数据库
-    private String districtName;
 
+    private String examId;//考官所属考试
+    private String evaluationState;//考官所属考试
     public Examiner(){
 
     }
@@ -170,22 +169,6 @@ public class Examiner {
         this.district = district;
     }
 
-    /* public DictDistrict getDistrict() {
-        return district;
-    }
-
-    public void setDistrict(DictDistrict district) {
-        this.district = district;
-    }*/
-
-    public String getDistrictName() {
-        return districtName;
-    }
-
-    public void setDistrictName(String districtName) {
-        this.districtName = districtName;
-    }
-
     public String getState() {
         return state;
     }
@@ -194,7 +177,23 @@ public class Examiner {
         this.state = state;
     }
 
-    public Examiner(String examinerName, String idCard, String sex, String nation, String political, String examType, String subjectName, String companyName, String position, String mailingAddress, String fixedTel, String tel, String email, String district, String state, String districtName) {
+    public String getExamId() {
+        return examId;
+    }
+
+    public void setExamId(String examId) {
+        this.examId = examId;
+    }
+
+    public String getEvaluationState() {
+        return evaluationState;
+    }
+
+    public void setEvaluationState(String evaluationState) {
+        this.evaluationState = evaluationState;
+    }
+
+    public Examiner(String examinerName, String idCard, String sex, String nation, String political, String examType, String subjectName, String companyName, String position, String mailingAddress, String fixedTel, String tel, String email, String district, String state, String examId, String evaluationState) {
         this.examinerName = examinerName;
         this.idCard = idCard;
         this.sex = sex;
@@ -210,9 +209,9 @@ public class Examiner {
         this.email = email;
         this.district = district;
         this.state = state;
-        this.districtName = districtName;
+        this.examId = examId;
+        this.evaluationState = evaluationState;
     }
-
 
     @Override
     public String toString() {
@@ -231,9 +230,8 @@ public class Examiner {
                 ", fixedTel='" + fixedTel + '\'' +
                 ", tel='" + tel + '\'' +
                 ", email='" + email + '\'' +
-                ", district=" + district +
+                ", district='" + district + '\'' +
                 ", state='" + state + '\'' +
-                ", districtName='" + districtName + '\'' +
                 '}';
     }
 }

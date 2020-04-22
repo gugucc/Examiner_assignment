@@ -36,10 +36,9 @@
     <div class="layui-form-item">
         <label class="layui-form-label">选择名族</label>
         <div class="layui-input-inline">
-            <select name="nationId" lay-search="" id="selectNation" lay-filter="addNation">
-                <option value="" selected disabled style="display: none;">请选择名族</option>
+            <select name="nation" lay-search="" id="selectNation" lay-filter="addNation">
                 <span th:each="nation:${nationList}">
-                      <option th:selected="${nationName eq nation.nationName}" th:value="${nation.id}" th:text="${nation.nationName}"></option>
+                      <option th:selected="${nation eq nation.nationName}" th:value="${nation.nationName}" th:text="${nation.nationName}"></option>
                 </span>
             </select>
         </div>
@@ -48,10 +47,9 @@
     <div class="layui-form-item">
         <label class="layui-form-label">选择政治面貌</label>
         <div class="layui-input-inline">
-            <select name="politicalId" lay-search="" id="selectPolitical" lay-filter="addPolitical">
-                <option value="" selected disabled style="display: none;">请选择政治面貌</option>
+            <select name="political" lay-search="" id="selectPolitical" lay-filter="addPolitical">
                 <span th:each="political:${politicalList}">
-                      <option th:selected="${politicalName} eq ${political.politicalName}" th:value="${political.id}" th:text="${political.politicalName}"></option>
+                      <option th:selected="${politicalName} eq ${political.politicalName}" th:value="${political.politicalName}" th:text="${political.politicalName}"></option>
                 </span>
             </select>
         </div>
@@ -60,22 +58,20 @@
     <div class="layui-form-item">
         <label class="layui-form-label">选择学段</label>
         <div class="layui-input-inline">
-            <select name="examTypeId" lay-search="" id="selectExamType" lay-filter="addExamType">
-                <option value="" selected disabled style="display: none;">请选择学段</option>
+            <select name="examType" lay-search="" id="selectExamType" lay-filter="addExamType">
                 <span th:each="examType:${examTypeList}">
-                      <option th:selected="${TypeName} eq ${examType.TypeName}" th:value="${examType.id}" th:text="${examType.typeName}"></option>
+                      <option th:selected="${TypeName} eq ${examType.typeName}" th:value="${examType.typeName}" th:text="${examType.typeName}"></option>
                 </span>
             </select>
         </div>
     </div>
 
     <div class="layui-form-item">
-        <label class="layui-form-label">选择学科/学科代码</label>
+        <label class="layui-form-label">选择学科</label>
         <div class="layui-input-inline">
-            <select name="studySubjectId" lay-search="" id="selectStudySubject" lay-filter="addStudySubject">
-                <option value="" selected disabled style="display: none;">请选择学科/学科代码</option>
-                <span th:each="studySubject:${studySubjectList}">
-                      <option th:selected="${studySubject} eq ${studySubject.subjectName}" th:value="${studySubject.id}" th:text="${studySubject.subjectName}"></option>
+            <select name="subjectName" lay-search="" id="selectStudySubject" lay-filter="addStudySubject">
+                <span th:each="sSL:${studySubjectList}">
+                      <option th:selected="${studySubject} eq ${sSL.subjectName}" th:value="${sSL.subjectName}" th:text="${sSL.subjectName}"></option>
                 </span>
             </select>
         </div>
@@ -126,10 +122,9 @@
     <div class="layui-inline">
         <label class="layui-form-label">区县：</label>
         <div class="layui-input-inline" >
-            <select name="districtId" lay-search="" id="selectDistrict" lay-filter="addDistrict">
-                <option value="" selected disabled style="display: none;">请选择区县</option>
+            <select name="district" lay-search="" id="selectDistrict" lay-filter="addDistrict">
                 <span th:each="dst:${districtList}">
-                      <option th:selected="${district} eq ${dst.districtName}" th:value="${dst.id}" th:text="${dst.districtName}"></option>
+                      <option th:selected="${district} eq ${dst.districtName}" th:value="${dst.districtName}" th:text="${dst.districtName}"></option>
                 </span>
             </select>
         </div>
@@ -172,26 +167,26 @@
             var examinerName = $("input[name='examinerName']").val();
             var idCard = $("input[name='idCard']").val();
             var sex = $('input:radio(sex):checked').val();
-            var nationId = $("select[name='nationId']").val();
-            var politicalId = $("select[name='politicalId']").val();
-            var examTypeId = $("select[name='examTypeId']").val();
-            var studySubjectId = $("select[name='studySubjectId']").val();
+            var nation = $("select[name='nation']").val();
+            var political = $("select[name='political']").val();
+            var examType = $("select[name='examType']").val();
+            var subjectName = $("select[name='subjectName']").val();
             var companyName = $("input[name='companyName']").val();
             var position = $("input[name='position']").val();
             var mailingAddress = $("input[name='mailingAddress']").val();
             var FixedTel = $("input[name='FixedTel']").val();
             var tel = $("input[name='tel']").val();
             var email = $("input[name='email']").val();
-            var districtId = $("select[name='districtId']").val();
+            var district = $("select[name='district']").val();
             var state = $('input[name=state]:checked').val();
-            if (examinerName==""||idCard==""||sex==""||nationId==""||politicalId==""||examTypeId==""||studySubjectId==""||companyName==""||mailingAddress==""||FixedTel==""||tel==""||email==""||districtId==""||state==""){
+            if (id==""||examinerName==""||idCard==""||sex==""||nation==""||political==""||examType==""||subjectName==""||companyName==""||mailingAddress==""||FixedTel==""||tel==""||email==""||district==""||state==""){
                 layer.msg("每项都必须不为空！")
             }else {
-                console.log(sex);
+                console.log(id);
                 $.ajax({
                     type:"post",
                     url:"/editExaminer",
-                    data:{"examinerName":examinerName,"idCard":idCard,"sex":sex,"nationId":nationId,"id":id,"politicalId":politicalId,"examTypeId":examTypeId,"studySubjectId":studySubjectId,"companyName":companyName,"position":position,"mailingAddress":mailingAddress,"FixedTel":FixedTel,"tel":tel,"email":email,"districtId":districtId,"state":state},
+                    data:{"examinerName":examinerName,"idCard":idCard,"sex":sex,"nation":nation,"id":id,"political":political,"examType":examType,"subjectName":subjectName,"companyName":companyName,"position":position,"mailingAddress":mailingAddress,"FixedTel":FixedTel,"tel":tel,"email":email,"district":district,"state":state},
                     success:function (data) {
                         if (data == "ok") {
                             layer.msg(email+"添加成功！");

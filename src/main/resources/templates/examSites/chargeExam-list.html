@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>layui</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+    <link rel="stylesheet" href="/lib/layui-v2.5.4/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <link rel="stylesheet" href="../../static/lib/laydate/theme/default/laydate.css">
+</head>
+<body>
+<div class="layuimini-container">
+    <div class="layuimini-main">
+        <fieldset class="layui-elem-field layuimini-search">
+            <legend>搜索信息</legend>
+            <div style="margin: 10px 10px 10px 10px">
+                <form class="layui-form layui-form-pane" action="">
+                    <div class="layui-form-item">
+                        <div class="layui-inline">
+                            <label class="layui-form-label">考试名</label>
+                            <div class="layui-input-inline">
+                                <input type="text" id="examName" name="examName" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">考试代码</label>
+                            <div class="layui-input-inline">
+                                <input type="text" id="examCode" name="examCode" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">科目</label>
+                            <div class="layui-input-inline">
+                                <input type="text" id="studySubject" name="studySubject" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">学段</label>
+                            <div class="layui-input-inline">
+                                <input type="text" id="examType" name="examType" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">开始时间</label>
+                            <div class="layui-input-inline">
+                                <input type="text" id="starTime" name="starTime" placeholder="yyyy-MM-dd HH:mm:ss" class="layui-input">
+                            </div>
+                        </div>
+
+                        <div class="layui-inline">
+                            <label class="layui-form-label">结束时间</label>
+                            <div class="layui-input-inline">
+                                <input type="text" class="layui-input" id="endTime" name="endTime" placeholder="yyyy-MM-dd HH:mm:ss">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <a class="layui-btn" lay-submit="" lay-filter="data-search-btn">搜索</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </fieldset>
+
+        <div class="layui-btn-group">
+        </div>
+        <div class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"> ></div>
+        <script type="text/html" id="currentTableBar">
+            {{#  if(d.state == '3'){ }}
+            <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="currExam">正在考试</a>
+            {{#  } else if(d.state == '4') { }}
+            <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="examFinish">考试结束</a>
+            {{# } else { }}
+            <a class="layui-btn layui-btn-xs data-count-edit" lay-event="edit">考官申报</a>
+            <a class="layui-btn layui-btn-xs data-count-edit" lay-event="confirm">考官确认</a>
+            {{#  } }}
+        </script>
+    </div>
+</div>
+<script src="/lib/layui-v2.5.4/layui.js" charset="utf-8" ></script>
+<script src="/lib/laydate/laydate.js" charset="utf-8"></script>
+<script th:inline="none">
+
+    layui.use('laydate', function() {
+        var laydate = layui.laydate;
+
+        //常规用法
+        laydate.render({
+            elem:'#endTime',
+            type: 'datetime',
+            trigger: 'click'
+        });
+        //常规用法
+        laydate.render({
+            elem:'#starTime',
+            type: 'datetime',
+            trigger: 'click',
+        });
+
+    })
+
+    layui.use(['form', 'table'], function () {
+        var $ = layui.jquery,
+            form = layui.form,
+            table = layui.table;
+
+        table.render({
+            elem: document.getElementById('currentTableId'),
+            url: '/chargeExamList',
+            //data:'session.user.getId()',
+            cols: [[
+                {type: "checkbox", width: 30, fixed: "left"},
+                {type: 'numbers', title: '序号', sort: true, width:30},
+                {field: 'examName', title: '考试名'},
+                {field: 'examCode', title: '考试代码',width:100},
+                {field: 'studySubject', title: '考试科目',width:120},
+                {field: 'examType', title: '学段',width:80},
+                {field: 'starTime',title: '开始时间'/*,templet : "<div>{{layui.util.toDateString(d.ordertime, 'yyyy年MM月dd日 HH:mm:ss')}}</div>"*/},
+                {field: 'endTime', title: '结束时间'/*,templet : "<div>{{layui.util.toDateString(d.ordertime, 'yyyy年MM月dd日 HH:mm:ss')}}</div>"*/},
+                {field: 'examSiteName', title: '考点',width:100},
+                {field: 'quantity', title: '需求数量',width:80},
+                {title: '操作', minWidth: 50, templet: '#currentTableBar', fixed: "right", align: "center"}
+            ]],
+            page:true,
+            limit:10,
+            response:{statusCode:0},
+            parseData:function (data) {
+                return {
+                    "code": 0, //解析接口状态
+                    "msg": "", //解析提示文本
+                    "count": data.size, //解析数据长度
+                    "data": data.data //解析数据列表
+                }
+            }
+
+        });
+
+        // 监听搜索操作
+        form.on('submit(data-search-btn)', function (data) {
+            // 搜索条件
+            var examName = $('#examName').val();
+            var examCode = $('#examCode').val();
+            var starTime = $('#starTime').val();
+            var endTime = $('#endTime').val();
+            //执行搜索重载
+            table.reload('currentTableId', {
+                url:"/LikeExam",
+                page: {
+                    curr: 1
+                }
+                , where: {
+                    'examName': $.trim(examName),
+                    'examCode': $.trim(examCode),
+                    'starTime': $.trim(starTime),
+                    'endTime': $.trim(endTime),
+                }
+            });
+
+            return false;
+        });
+
+        // 监听添加操作
+       /* $(".data-add-btn").on("click", function () {
+            layer.open({
+                type:2,
+                content:"/ExaminerDeclare",
+                maxmin:true,
+                area:['600px','700px'],
+                shadeClose:true,
+                end: function (index) {
+                    layer.close(index);
+                    table.reload('currentTableId',{
+                        url:'/chargeExamList',
+                        where: { //设定异步数据接口的额外参数，任意设
+                        },
+                        page: {
+                            curr: 1 //重新从第 1 页开始
+                        }
+                    });
+                }
+            })
+        });*/
+
+        // 监听删除操作
+       /* $(".data-delete-btn").on("click", function () {
+            var checkStatus = table.checkStatus('currentTableId')
+                , data = checkStatus.data;
+            if (JSON.stringify(data) == null || JSON.stringify(data) == "[]"){
+                layer.msg("选择不能为空！");
+            }else {
+                layer.confirm('真的删除行么', function (index) {
+                    if (index) {
+                        var checkStatus = table.checkStatus('currentTableId'),
+                            data = checkStatus.data
+                        var id = [];
+                        if (data.length > 0) {
+                            for (var i = 0; i < data.length; i++) {
+                                id += data[i].id + ',';
+                            }
+                            console.log(id);
+                            $.ajax({
+                                url: '/deleteAllExam?id=' + id,
+                            });
+                            layer.close(index);
+                            layer.msg('删除成功');
+                            table.reload('currentTableId', {
+                                url: '/chargeExamList',
+                                where: { //设定异步数据接口的额外参数，任意设
+                                    id: id
+                                },
+                                page: {
+                                    curr: 1 //重新从第 1 页开始
+                                }
+                            });
+                        }
+                        ;
+                    } else {
+                        layer.close(index);
+                    }
+                });
+            }
+        });*/
+
+        //监听表格复选框选择
+        table.on('checkbox(currentTableFilter)', function (obj) {
+            console.log(obj)
+        });
+
+        table.on('tool(currentTableFilter)', function (obj) {
+
+            var data = obj.data;
+            if (obj.event === 'edit') {
+
+                layer.open({
+                    type:2,
+                    content:"/examinerDeclare?id="+data.id,
+                    maxmin:true,
+                    area:['600px','700px'],
+                    shadeClose:true,
+                    end: function(layero, index){//无论是确认还是取消，只要层被销毁了，end都会执行，不携带任何参数。layer.open关闭事件
+                        table.reload('currentTableId',{
+                            url:'/chargeExamList',
+                            where: { //设定异步数据接口的额外参数，任意设
+                            },
+                            page: {
+                                curr: 1 //重新从第 1 页开始
+                            }
+                        });
+                    }
+                })
+
+            }  else if (obj.event === 'delete') {
+                layer.confirm('真的删除行么', function (index) {
+                    if (index){
+                        $.ajax({
+                            url:"/deleteExam?id="+data.id,
+                            success:function (data) {
+                                obj.del();
+                                layer.alert('删除成功');
+                            }
+                        });
+                    }else {
+                        layer.close(index);
+                    }
+                });
+            }else if (obj.event === 'confirm'){
+                var index = layer.open({
+                    type:2,
+                    content:"/statusConfirmationPage?id="+data.id,
+                    maxmin:true,
+                    area:['500px','500px'],
+                    shadeClose:true,
+                    end: function(layero, index){//无论是确认还是取消，只要层被销毁了，end都会执行，不携带任何参数。layer.open关闭事件
+                        table.reload('currentTableId',{
+                            url:'/chargeExamList',
+                            where: { //设定异步数据接口的额外参数，任意设
+                            },
+                            page: {
+                                curr: 1 //重新从第 1 页开始
+                            }
+                        });
+                    }
+                })
+                layer.full(index);
+            }
+        });
+
+    });
+</script>
+<script>
+
+
+</script>
+
+</body>
+</html>
