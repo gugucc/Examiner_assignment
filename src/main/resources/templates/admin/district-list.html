@@ -20,9 +20,9 @@
                 <form class="layui-form layui-form-pane" action="">
                     <div class="layui-form-item">
                         <div class="layui-inline">
-                            <label class="layui-form-label">区县代码</label>
+                            <label class="layui-form-label">区县</label>
                             <div class="layui-input-inline">
-                                <input type="text" id="districtCode" name="districtCode" autocomplete="off" class="layui-input">
+                                <input type="text" id="districtName" name="districtName" autocomplete="off" class="layui-input">
                             </div>
                         </div>
                         <div class="layui-inline">
@@ -80,7 +80,7 @@
         // 监听搜索操作
         form.on('submit(data-search-btn)', function (data) {
             // 搜索条件
-            var districtCode = $("#districtCode").val();
+            var districtName = $("#districtName").val();
             //执行搜索重载
             table.reload('currentTableId', {
                 url:"/LikeDistrict",
@@ -88,7 +88,7 @@
                     curr: 1
                 }
                 , where: {
-                    'districtCode': $.trim(districtCode)
+                    'districtName': $.trim(districtName)
                 }
             }, 'data');
 

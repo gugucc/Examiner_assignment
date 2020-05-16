@@ -19,10 +19,10 @@ public class Exam {
     private Timestamp endTime;//面试结束日期
     private String studySubject;//科目名
     private String examType;//学段
-    private String absentExaminer;//缺席考官
+    //private String absentExaminer;//缺席考官
     private Integer quantity;//考官申报的数量
     @ManyToOne//与考点实体多对一关系建立
-    @JoinColumn(name = "examSite_id")
+    @JoinColumn(name = "exam_site_id",foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT))
     @JsonBackReference//禁止此字段序列化，防止死循环
     private ExamSite examSite;//所属考点
     @Transient//禁止此字段对应数据库
@@ -107,14 +107,6 @@ public class Exam {
         this.examType = examType;
     }
 
-    public String getAbsentExaminer() {
-        return absentExaminer;
-    }
-
-    public void setAbsentExaminer(String absentExaminer) {
-        this.absentExaminer = absentExaminer;
-    }
-
     public Integer getQuantity() {
         return quantity;
     }
@@ -131,14 +123,13 @@ public class Exam {
         this.state = state;
     }
 
-    public Exam(String examName, String examCode, Timestamp starTime, Timestamp endTime, String studySubject, String examType, String absentExaminer, Integer quantity, ExamSite examSite, String examSiteName, Integer state) {
+    public Exam(String examName, String examCode, Timestamp starTime, Timestamp endTime, String studySubject, String examType, Integer quantity, ExamSite examSite, String examSiteName, Integer state) {
         this.examName = examName;
         this.examCode = examCode;
         this.starTime = starTime;
         this.endTime = endTime;
         this.studySubject = studySubject;
         this.examType = examType;
-        this.absentExaminer = absentExaminer;
         this.quantity = quantity;
         this.examSite = examSite;
         ExamSiteName = examSiteName;

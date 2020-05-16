@@ -95,4 +95,17 @@ public class UploadController {
         return map;
     }
 
+    /**
+     * 测试单sheet导出
+     *
+     * @throws IOException
+     */
+    @RequestMapping("/ExportExcel")
+    @ResponseBody
+    public void examinerExportExcel() throws IOException {
+        List<Examiner> content = examinerService.findAllList();
+        System.out.println(content);
+        EasyPoiUtils.exportExcel(Examiner.class, content, "src/main/resources/excel/", "考官信息表.xls");
+    }
+
 }

@@ -15,7 +15,7 @@ public class ExamSite {
     private String ExamSiteName;//考点名称
     private String district;
     @OneToMany(mappedBy = "examSite")//与考点建立一对多关系
-    private List<Exam> exams = new ArrayList<>();
+    private List<Exam> exams;
     private String Principal;//负责人
     private String PrnTel;//负责人电话
 

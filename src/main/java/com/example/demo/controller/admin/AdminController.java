@@ -393,7 +393,7 @@ public class AdminController {
         return new ModelAndView("admin/examTypeAdd.html", "model", model);
     }
 
-    //添加班级的方法
+    //添加学段的方法
     @PostMapping("/addExamType")
     @ResponseBody
     public String addExamType(DictExamType dictExamType) {
@@ -440,6 +440,33 @@ public class AdminController {
         // 调用service层的批量删除函数
         examTypeService.deleteAllExamType(LString);
         return "ok";
+    }
+    //搜索学段
+    @GetMapping("/LikeExamType")
+    @ResponseBody
+    public Map<String, Object> LikeExamType(Integer page, Integer limit, DictExamType dictExamType) {
+        page--;
+        Pageable pageable = PageRequest.of(page, limit);
+        List<DictExamType> content = examTypeService.findAll(new Specification<DictExamType>() {
+            @Override
+            public Predicate toPredicate(Root<DictExamType> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder cb) {
+                List<Predicate> list = new ArrayList<>();
+                //根据dptName 模糊查询Department
+                if (StringUtils.isNotBlank(dictExamType.getTypeName())) {
+                    list.add(cb.like(root.get("typeName").as(String.class), "%" + dictExamType.getTypeName() + "%"));
+                }
+                if (StringUtils.isNotBlank(dictExamType.getTypeCode())) {
+                    list.add(cb.like(root.get("typeCode").as(String.class), "%" + dictExamType.getTypeCode() + "%"));
+                }
+                Predicate[] pre = new Predicate[list.size()];
+                criteriaQuery.where(list.toArray(pre));
+                return cb.and(list.toArray(pre));
+            }
+        }, pageable).getContent();
+        Map<String, Object> map = new HashMap<>();
+        map.put("data", content);
+        map.put("size", examTypeService.findAllCount());
+        return map;
     }
 
 
@@ -538,9 +565,6 @@ public class AdminController {
         List<Long> LString = new ArrayList<Long>();
         for (String str : dssList) {
             DictStudySubject dss = studySubjectService.findById(Long.valueOf(id));
-         /*   if (dep.getStudents()!=null&&dep.getTeachers()!=null&&dep.getCgClasses()!=null){
-                return "no";
-            }*/
             LString.add(new Long(str));
         }
         // 调用service层的批量删除函数
@@ -552,7 +576,7 @@ public class AdminController {
     //搜索科目
     @GetMapping("/LikeStudySubject")
     @ResponseBody
-    public Map<String, Object> studySubject(Integer page, Integer limit, DictStudySubject studySubject) {
+    public Map<String, Object> LikeStudySubject(Integer page, Integer limit, DictStudySubject studySubject) {
         page--;
         Pageable pageable = PageRequest.of(page, limit);
         List<DictStudySubject> content = studySubjectService.findAll(new Specification<DictStudySubject>() {
@@ -562,6 +586,9 @@ public class AdminController {
                 //根据dptName 模糊查询Department
                 if (StringUtils.isNotBlank(studySubject.getSubjectName())) {
                     list.add(cb.like(root.get("subjectName").as(String.class), "%" + studySubject.getSubjectName() + "%"));
+                }
+                if (StringUtils.isNotBlank(studySubject.getSubjectCode())) {
+                    list.add(cb.like(root.get("subjectCode").as(String.class), "%" + studySubject.getSubjectCode() + "%"));
                 }
                 Predicate[] pre = new Predicate[list.size()];
                 criteriaQuery.where(list.toArray(pre));
@@ -574,7 +601,7 @@ public class AdminController {
         return map;
     }
 
-    //缺席原因列表获取：页面
+    //评价选项
     @GetMapping("/evaluateItem")
     @ResponseBody
     public Map<String, Object> evaluateItem(Integer page, Integer limit) {
@@ -587,7 +614,7 @@ public class AdminController {
         return map;
     }
 
-    //修改页面获取
+    //修改评价选项
     @GetMapping("/editEvaluateItem")
     public ModelAndView toeditEvaluateItem(Long id, Model model) {
 
@@ -596,7 +623,7 @@ public class AdminController {
         return new ModelAndView("admin/evaluateItemForm.html", "model", model);
     }
 
-    //方法
+    //方法修改评价选项
     @PostMapping("/editEvaluateItem")
     @ResponseBody
     public String editEvaluateItem(EvaluateItem evaluateItem) {
@@ -630,14 +657,14 @@ public class AdminController {
 
     }
 
-    //添加缺席原因的界面
+    //添加评价选项
     @GetMapping("/addEvaluateItem")
     public ModelAndView addEvaluateItem(Model model) {
         return new ModelAndView("admin/evaluateItemAdd.html", "model", model);
     }
 
 
-    //添加缺席原因的方法
+    //添加评价选项的方法
     @PostMapping("/addEvaluateItem")
     @ResponseBody
     public String addEvaluateItem(EvaluateItem evaluateItem) {
@@ -652,7 +679,7 @@ public class AdminController {
         }
     }
 
-    //单个删除
+    //单个删除评价选项
     @GetMapping("/deleteEvaluateItem")
     @ResponseBody
     public String deleteEvaluateItem(int id) {
@@ -664,7 +691,7 @@ public class AdminController {
         return "no";
     }
 
-    //多个删除
+    //多个删除评价选项
     @GetMapping("/deleteAllEvaluateItem")
     @ResponseBody
     public String deleteAllEvaluateItem(@RequestParam("id") String id) {
@@ -851,10 +878,8 @@ public class AdminController {
     //修改考点方法
     @PostMapping("/editExamSite")
     @ResponseBody
-    public String editExamSite(ExamSite examSite, Long district) {
+    public String editExamSite(ExamSite examSite) {
         ExamSite examSiteNew = examSiteService.findById(examSite.getId());
-
-
         if (examSiteNew.getExamSiteName().equals(examSite.getExamSiteName())) {
             if (examSiteNew.getPrincipal().equals(examSite.getPrincipal())) {
                 if (examSiteNew.getPrnTel().equals(examSite.getPrnTel())) {
@@ -863,8 +888,6 @@ public class AdminController {
                     }
                 }
             }
-
-
             examSiteNew.setExamSiteName(examSite.getExamSiteName());
             examSiteNew.setPrincipal(examSite.getPrincipal());
             examSiteNew.setPrnTel(examSite.getPrnTel());
@@ -901,9 +924,8 @@ public class AdminController {
     //添加考点的方法
     @PostMapping("/addExamSite")
     @ResponseBody
-    public String addExamSite(ExamSite examSite, Long district) {
+    public String addExamSite(ExamSite examSite) {
         //判断工号是否存在
-
         if (examSiteService.findOneByName(examSite.getExamSiteName()) != null) {
             return "equals";
         }
@@ -947,28 +969,24 @@ public class AdminController {
         return i;
     }
 
-
     //搜索考点
     @GetMapping("/LikeExamSite")
     @ResponseBody
-    public Map<String, Object> examSite(Integer page, Integer limit, ExamSite examSite) {
+    public Map<String, Object> LikeExamSite(Integer page, Integer limit, ExamSite examSite) {
         page--;
         Pageable pageable = PageRequest.of(page, limit);
         List<ExamSite> content = examSiteService.findAll(new Specification<ExamSite>() {
             @Override
             public Predicate toPredicate(Root<ExamSite> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder cb) {
                 List<Predicate> list = new ArrayList<>();
-                //根据username 模糊查询ExamSite
+                //根据dptName 模糊查询ExamSite
                 if (StringUtils.isNotBlank(examSite.getExamSiteName())) {
-                    list.add(cb.like(root.get("examSiteName").as(String.class), "%" + examSite.getExamSiteName() + "%"));
+                    list.add(cb.like(root.get("examSite_name").as(String.class), "%" + examSite.getExamSiteName() + "%"));
                 }
-                //根据teacherNumber 查询ExamSite
                 if (StringUtils.isNotBlank(examSite.getPrincipal())) {
                     list.add(cb.like(root.get("principal").as(String.class), "%" + examSite.getPrincipal() + "%"));
                 }
-                //根据dptName 查询teacher
                 if (StringUtils.isNotBlank(examSite.getDistrict())) {
-                    ;
                     list.add(cb.like(root.get("district").as(String.class), "%" + examSite.getDistrict() + "%"));
                 }
                 Predicate[] pre = new Predicate[list.size()];
@@ -1021,7 +1039,6 @@ public class AdminController {
     //修改考试列表页面
     @GetMapping("/editExam")
     public ModelAndView toeditExam(Long id, Model model) {
-
         List<ExamSite> examSiteList = examSiteService.findAllList();
         List<DictStudySubject> studySubjectList = studySubjectService.findAllList();
         List<DictExamType> examTypeList = examTypeService.findAllList();
@@ -1029,8 +1046,6 @@ public class AdminController {
         model.addAttribute("studySubject",exam.getStudySubject());
         model.addAttribute("examSite",exam.getExamSite().getExamSiteName());
         model.addAttribute("examType",exam.getExamType());
-        System.out.println(exam.getExamSite().getExamSiteName());
-        System.out.println(exam.getExamType());
         model.addAttribute("exam", exam);
         model.addAttribute("examSiteList", examSiteList);
         model.addAttribute("studySubjectList", studySubjectList);
@@ -1043,7 +1058,6 @@ public class AdminController {
     @ResponseBody
     public String editExam(Exam exam, Long examSite) {
         Exam examNew = examService.findById(exam.getId());
-
         if (examNew.getExamName().equals(exam.getExamName())) {
             if (examNew.getExamCode().equals(exam.getExamCode())) {
                 if (examNew.getStudySubject().equals(exam.getStudySubject())) {
@@ -1058,8 +1072,6 @@ public class AdminController {
                     }
                 }
             }
-
-
             examNew.setExamName(exam.getExamName());
             examNew.setExamCode(exam.getExamCode());
             examNew.setStudySubject(exam.getStudySubject());
@@ -1090,14 +1102,12 @@ public class AdminController {
     //添加考试的界面
     @GetMapping("/addExam")
     public ModelAndView addExam(Model model) {
-
         List<ExamSite> examSiteList = examSiteService.findAllList();
         List<DictStudySubject> studySubjectList = studySubjectService.findAllList();
         List<DictExamType> examTypeList = examTypeService.findAllList();
         model.addAttribute("examSiteList", examSiteList);
         model.addAttribute("studySubjectList", studySubjectList);
         model.addAttribute("examTypeList", examTypeList);
-
         return new ModelAndView("admin/examAdd.html", "model", model);
     }
 
@@ -1106,7 +1116,6 @@ public class AdminController {
     @ResponseBody
     public String addExam(Exam exam) {
         //判断工号是否存在
-
         if (examService.findOneByName(exam.getExamName()) != null) {
             return "equals";
         }
@@ -1121,11 +1130,7 @@ public class AdminController {
         } catch (Exception e) {
             return "no";
         }
-
-
     }
-    //java计时器时间到自动结束考试
-    //结束考试
 
     //删除单个
     @GetMapping("/deleteExam")
@@ -1275,7 +1280,6 @@ public class AdminController {
             System.out.println(i);
         }
         examService.updateState(1, id);//state:1代表考官分配完成
-
         return "ok";
     }
 
@@ -1389,8 +1393,8 @@ public class AdminController {
         map.put("size", examinerService.findAllCount());
         return map;
     }
-//查看评价结果
 
+//查看评价结果
     /*//结束考试列表获取
     @GetMapping("/evaluationExam")
     @ResponseBody

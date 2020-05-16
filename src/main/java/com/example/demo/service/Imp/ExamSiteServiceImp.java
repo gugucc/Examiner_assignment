@@ -62,7 +62,7 @@ public class ExamSiteServiceImp implements ExamSiteService {
     }
 
     @Override
-    public Page<ExamSite> findAll(Specification<ExamSite> ets, Pageable pageable) {
-        return examSiteRepository.findAll(ets,pageable);
+    public Page<ExamSite> findAll(Specification<ExamSite> examSiteSpecification, Pageable pageable) {
+        return examSiteRepository.findAll(examSiteSpecification,pageable);
     }
 }

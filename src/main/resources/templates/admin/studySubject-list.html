@@ -92,7 +92,7 @@
             var subjectCode = $('#subjectCode').val();
             //执行搜索重载
             table.reload('currentTableId', {
-                url:"/LikeExamSite",
+                url:"/LikeStudySubject",
                 page: {
                     curr: 1
                 }
@@ -100,7 +100,7 @@
                     'subjectName': $.trim(subjectName),
                     'subjectCode': $.trim(subjectCode),
                 }
-            });
+            },'data');
 
             return false;
         });

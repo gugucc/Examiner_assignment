@@ -52,8 +52,8 @@
         <label class="layui-form-label">学段</label>
         <div class="layui-input-inline">
             <select name="examType" lay-search="" disabled="disabled">
-                <span th:each="examType:${examTypeList}">
-                    <option th:selected="${examType} eq ${examType.typeName}" th:value="${examType.typeName}" th:text="${examType.typeName}" ></option>
+                <span th:each="eTL:${examTypeList}">
+                    <option th:selected="${examType} eq ${eTL.typeName}" th:value="${eTL.typeName}" th:text="${eTL.typeName}"></option>
                 </span>
             </select>
         </div>
@@ -62,8 +62,8 @@
         <label class="layui-form-label">选择考点</label>
         <div class="layui-input-inline">
             <select name="examSite" lay-search="" disabled="disabled">
-                <span th:each="examSite:${examSiteList}">
-                    <option th:selected="${examSite} eq ${examSite.examSiteName}" th:value="${examSite.id}" th:text="${examSite.examSiteName}" ></option>
+                <span th:each="eSL:${examSiteList}">
+                    <option th:selected="${examSite} eq ${eSL.examSiteName}" th:value="${eSL.id}" th:text="${eSL.examSiteName}"></option>
                 </span>
             </select>
         </div>

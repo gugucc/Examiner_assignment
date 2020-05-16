@@ -53,18 +53,7 @@ public class ExamSiteController {
         return new ModelAndView("examSites/index");
     }
 
-    /**
-     * 测试单sheet导出
-     *
-     * @throws IOException
-     */
-    @RequestMapping("/ExporExcel")
-    @ResponseBody
-    public void examinerExportExcel() throws IOException {
-        List<Examiner> content = examinerService.findAllList();
-        System.out.println(content);
-        EasyPoiUtils.exportExcel(Examiner.class, content, "src/main/resources/excel/", "考官信息表.xls");
-    }
+
 
     //考试列表获取
     @GetMapping("/chargeExamList")
@@ -84,7 +73,6 @@ public class ExamSiteController {
         return map;
     }
 
-
     //考官申报页面
     @GetMapping("/examinerDeclare")
     public ModelAndView toExaminerDeclare(Long id,Model model){
@@ -93,7 +81,9 @@ public class ExamSiteController {
         List<DictStudySubject> studySubjectList = studySubjectService.findAllList();
         List<DictExamType> examTypeList = examTypeService.findAllList();
         Exam exam = examService.findById(id);
+        model.addAttribute("studySubject",exam.getStudySubject());
         model.addAttribute("examSite",exam.getExamSite().getExamSiteName());
+        model.addAttribute("examType",exam.getExamType());
         model.addAttribute("exam",exam);
         model.addAttribute("examSiteList",examSiteList);
         model.addAttribute("studySubjectList",studySubjectList);

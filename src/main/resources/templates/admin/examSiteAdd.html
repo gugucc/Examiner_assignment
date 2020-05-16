@@ -37,7 +37,7 @@
             <select name="district" lay-search="" >
                 <option value="" selected disabled style="display: none;">请选择考点</option>
                 <span th:each="dst:${districtList}">
-                    <option th:value="${dst.id}" th:text="${dst.districtName}"></option>
+                    <option th:value="${dst.districtName}" th:text="${dst.districtName}"></option>
                 </span>
             </select>
         </div>

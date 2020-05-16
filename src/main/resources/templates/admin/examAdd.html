@@ -39,23 +39,23 @@
         </div>
     </div>
     <div class="layui-form-item">
-        <label class="layui-form-label">考试科目</label>
-        <div class="layui-input-inline">
-            <select name="studySubject" lay-search="">
-                <option value="" selected disabled style="display: none;">请选择科目</option>
-                <span th:each="studySubject:${studySubjectList}">
-                      <option th:value="${studySubject.subjectName}" th:text="${studySubject.subjectName}"></option>
-                </span>
-            </select>
-        </div>
-    </div>
-    <div class="layui-form-item">
         <label class="layui-form-label">学段</label>
         <div class="layui-input-inline">
             <select name="examType" lay-search="">
                 <option value="" selected disabled style="display: none;">请选择学段</option>
                 <span th:each="examType:${examTypeList}">
                       <option th:value="${examType.typeName}" th:text="${examType.typeName}"></option>
+                </span>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">考试科目</label>
+        <div class="layui-input-inline">
+            <select name="studySubject" lay-search="">
+                <option value="" selected disabled style="display: none;">请选择科目</option>
+                <span th:each="studySubject:${studySubjectList}">
+                      <option th:value="${studySubject.subjectName}" th:text="${studySubject.subjectName}"></option>
                 </span>
             </select>
         </div>
@@ -102,6 +102,17 @@
         var form = layui.form;
         form.render(); //更新全部
         //各种基于事件的操作，下面会有进一步介绍
+      /*  form.on('select(addExam)', function(data){
+
+            $.ajax({
+                url:"/getDepartmentByClassId",
+                type:"post",
+                data:{"className":data.value},
+                success:function (data) {
+                    $("#department").val(data);
+                }
+            })
+        });*/
         $("#edit").click(function () {
             var id = $('input:hidden').val();
             var examName = $("input[name='examName']").val();

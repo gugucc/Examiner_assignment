@@ -95,17 +95,18 @@
         // 监听搜索操作
         form.on('submit(data-search-btn)', function (data) {
             // 搜索条件
-            var examSiteName = $('#examSiteName').val();
+            var examSite_name = $('#examSiteName').val();
             var principal = $('#principal').val();
             var district = $('#district').val();
             //执行搜索重载
+
             table.reload('currentTableId', {
                 url:"/LikeExamSite",
                 page: {
                     curr: 1
                 }
                 , where: {
-                    'examSiteName': $.trim(examSiteName),
+                    'examSite_name': $.trim(examSite_name),
                     'principal': $.trim(principal),
                     'district': $.trim(district),
                 }

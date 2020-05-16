@@ -8,6 +8,7 @@ import cn.afterturn.easypoi.excel.entity.enmus.ExcelType;
 import com.example.demo.dto.Examiner;
 import org.apache.poi.ss.usermodel.Workbook;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -27,7 +28,6 @@ public class EasyPoiUtils {
      * @throws IOException
      */
     public static void exportExcel(Class<?> pojoClass, Collection<?> dataSet, String path, String filename) throws IOException {
-
         File savefile = new File(path);
         if (!savefile.exists()) {
             savefile.mkdirs();

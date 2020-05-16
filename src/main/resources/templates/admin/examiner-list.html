@@ -62,7 +62,7 @@
         <div class="layui-btn-group">
             <button class="layui-btn data-add-btn">添加</button>
             <button class="layui-btn layui-btn-danger data-delete-btn">删除</button>
-            <button class="layui-btn easy-expor-btn">Excel导出</button>
+            <button class="layui-btn easy-export-btn">Excel导出</button>
             <button type="button" class="layui-btn" id="ImportExcel"><i class="layui-icon"></i>Excel导入</button>
         </div>
         <div class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"> ></div>
@@ -186,11 +186,11 @@
         });
 
         //监听导出操作
-        $(".easy-expor-btn").on("click", function () {
+        $(".easy-export-btn").on("click", function () {
             layer.confirm('确定导出Excel',function(index){
                 $.ajax({
                     type: "post",
-                    url: '/ExporExcel',
+                    url: '/ExportExcel',
                 });
                 layer.close(index);
                 layer.msg('导出成功');
