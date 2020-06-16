@@ -10,24 +10,24 @@
     <link rel="stylesheet" href="/lib/layui-v2.5.4/css/layui.css" media="all">
 </head>
 <body>
-<input type="hidden" th:value="${course.id}">
+<input type="hidden" th:value="${district.id}">
 <div class="layui-form" lay-filter="layuiadmin-form-useradmin" id="layuiadmin-form-useradmin" style="padding: 20px 0 0 0;">
     <div class="layui-form-item">
         <label class="layui-form-label">区县</label>
         <div class="layui-input-inline">
-            <input type="text" name="districtName" placeholder="区县" autocomplete="off" class="layui-input">
+            <input type="text" th:value="${district.districtName}" name="districtName" placeholder="区县" autocomplete="off" class="layui-input">
         </div>
     </div>
     <div class="layui-form-item">
         <label class="layui-form-label">代码</label>
         <div class="layui-input-inline">
-            <input type="text" name="districtCode" placeholder="代码" autocomplete="off" class="layui-input">
+            <input type="text" th:value="${district.districtCode}" name="districtCode" placeholder="代码" autocomplete="off" class="layui-input">
         </div>
     </div>
     <div class="layui-form-item">
         <label class="layui-form-label">排序码</label>
         <div class="layui-input-inline">
-            <input type="text" name="districtSortCode" placeholder="排序码" autocomplete="off" class="layui-input">
+            <input type="text" th:value="${district.districtSortCode}" name="districtSortCode" placeholder="排序码" autocomplete="off" class="layui-input">
         </div>
     </div>
     <div class="layui-form-item">

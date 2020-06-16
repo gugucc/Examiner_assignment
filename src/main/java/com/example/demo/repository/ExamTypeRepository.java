@@ -31,7 +31,7 @@ public interface ExamTypeRepository extends JpaRepository<DictExamType,Long> {
     @Query(value = "delete from dict_exam_type where id in (?1)",nativeQuery = true)
     int deleteAllExamType(List<Long> ids);
 
-    @Query(value = "from dict_exam_type where type_name= ?1",nativeQuery = true)
+    @Query(value = "select * from dict_exam_type where type_name= ?1",nativeQuery = true)
     DictExamType findOneByName(String typeName);
 
     Page<DictExamType> findAll(Specification<DictExamType> ets, Pageable pageable);

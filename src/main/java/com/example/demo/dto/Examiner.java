@@ -21,7 +21,7 @@ public class Examiner {
     private String political;//政治面貌
     @Excel(name = "学段",orderNum = "5")
     private String examType;//学段
-    @Excel(name = "学科代码",orderNum = "6")
+    @Excel(name = "学科",orderNum = "6")
     private String subjectName;//学科
     @Excel(name = "单位名称",orderNum = "7")
     private String companyName;//单位名称

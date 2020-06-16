@@ -14,49 +14,6 @@
 <body>
 <div class="layuimini-container">
     <div class="layuimini-main">
-        <!--<fieldset class="layui-elem-field layuimini-search">
-            <legend>搜索信息</legend>
-            <div style="margin: 10px 10px 10px 10px">
-                <form class="layui-form layui-form-pane" action="">
-                    <div class="layui-form-item">
-                        <div class="layui-inline">
-                            <label class="layui-form-label">考官姓名</label>
-                            <div class="layui-input-inline">
-                                <input type="text" id="examinerName" name="examinerName" autocomplete="off" class="layui-input">
-                            </div>
-                        </div>
-                        <div class="layui-inline">
-                            <label class="layui-form-label">学科代码</label>
-                            <div class="layui-input-inline">
-                                <input type="text" id="subjectCode" name="subjectCode" autocomplete="off" class="layui-input">
-                            </div>
-                        </div>
-                        <div class="layui-inline">
-                            <label class="layui-form-label">学段</label>
-                            <div class="layui-input-inline">
-                                <input type="text" id="examType" name="examType" autocomplete="off" class="layui-input">
-                            </div>
-                        </div>
-                        <div class="layui-inline">
-                            <label class="layui-form-label">身份证号码</label>
-                            <div class="layui-input-inline">
-                                <input type="text" id="idCard" name="idCard" autocomplete="off" class="layui-input">
-                            </div>
-                        </div>
-                        <div class="layui-inline">
-                            <label class="layui-form-label">区县</label>
-                            <div class="layui-input-inline">
-                                <input type="text" id="district" name="district" autocomplete="off" class="layui-input">
-                            </div>
-                        </div>
-
-                        <div class="layui-inline">
-                            <a class="layui-btn" lay-submit="" lay-filter="data-search-btn">搜索</a>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </fieldset>-->
         <input type="hidden" th:value="${exam.id}">
         <div class="layui-btn-group">
             <button class="layui-btn layui-btn-danger data-delete-btn">删除</button>
@@ -70,25 +27,6 @@
 </div>
 <script src="/lib/layui-v2.5.4/layui.js" charset="utf-8" ></script>
 <script th:inline="none">
-
-   /* //监听批量导入
-    layui.use('upload', function() {
-        var $ = layui.jquery
-            , upload = layui.upload;
-        upload.render({ //允许上传的文件后缀
-            elem: '#ImportExcel'
-            , url: '/ImportExcel' //改成您自己的上传接口
-            , accept: 'file' //普通文件
-            ,processData: false //因为data值是FormData对象，不需要对数据做处理。
-            ,contentType: false
-            ,type:'POST'
-            , done: function (res) {
-                layer.msg('上传成功');
-                console.log(res)
-                location.reload();
-            }
-        });
-    })*/
 
     layui.use(['form', 'table'], function () {
         var $ = layui.jquery,
@@ -129,52 +67,6 @@
             }
 
         });
-
-       /* // 监听搜索操作
-        form.on('submit(data-search-btn)', function () {
-            // 搜索条件
-            var examinerName = $('#examinerName').val();
-            var subjectName = $('#subjectName').val();
-            var examType = $('#examType').val();
-            var idCard = $('#idCard').val();
-            var district = $('#district').val();
-            //执行搜索重载
-            table.reload('currentTableId', {
-                url:"/LikeExaminer",
-                page: {
-                    curr: 1
-                }
-                , where: {
-                    'examinerName': $.trim(examinerName),
-                    'subjectName': $.trim(subjectName),
-                    'examType': $.trim(examType),
-                    'idCard': $.trim(idCard),
-                    'district': $.trim(district),
-                }
-            });
-            return false;
-        });
-
-        //监听导出操作
-        $(".easy-expor-btn").on("click", function () {
-            layer.confirm('确定导出Excel',function(index){
-                $.ajax({
-                    type: "post",
-                    url: '/ExporExcel',
-                });
-                layer.close(index);
-                layer.msg('导出成功');
-                table.reload('currentTableId',{
-                    url:'/viewExaminer',
-                    where: { //设定异步数据接口的额外参数，任意设
-                    },
-                    page: {
-                        curr: 1 //重新从第 1 页开始
-                    }
-                });
-            })
-
-        });*/
 
         // 监听删除操作
         $(".data-delete-btn").on("click", function () {

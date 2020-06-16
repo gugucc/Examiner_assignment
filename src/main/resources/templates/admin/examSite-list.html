@@ -20,24 +20,11 @@
                 <form class="layui-form layui-form-pane" action="">
                     <div class="layui-form-item">
                         <div class="layui-inline">
-                            <label class="layui-form-label">考点名</label>
-                            <div class="layui-input-inline">
-                                <input type="text" id="examSiteName" name="examSiteName" autocomplete="off" class="layui-input">
-                            </div>
-                        </div>
-                        <div class="layui-inline">
-                            <label class="layui-form-label">考点联系人</label>
-                            <div class="layui-input-inline">
-                                <input type="text" id="principal" name="principal" autocomplete="off" class="layui-input">
-                            </div>
-                        </div>
-                        <div class="layui-inline">
                             <label class="layui-form-label">所属区县</label>
                             <div class="layui-input-inline">
                                 <input type="text" id="district" name="district" autocomplete="off" class="layui-input">
                             </div>
                         </div>
-
                         <div class="layui-inline">
                             <a class="layui-btn" lay-submit="" lay-filter="data-search-btn">搜索</a>
                         </div>
@@ -95,8 +82,8 @@
         // 监听搜索操作
         form.on('submit(data-search-btn)', function (data) {
             // 搜索条件
-            var examSite_name = $('#examSiteName').val();
-            var principal = $('#principal').val();
+            /*var examSite_name = $('#examSiteName').val();
+            var principal = $('#principal').val();*/
             var district = $('#district').val();
             //执行搜索重载
 
@@ -106,8 +93,8 @@
                     curr: 1
                 }
                 , where: {
-                    'examSite_name': $.trim(examSite_name),
-                    'principal': $.trim(principal),
+                    /*'examSite_name': $.trim(examSite_name),
+                    'principal': $.trim(principal),*/
                     'district': $.trim(district),
                 }
             });

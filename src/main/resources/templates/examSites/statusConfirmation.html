@@ -71,25 +71,6 @@
 <script src="/lib/layui-v2.5.4/layui.js" charset="utf-8" ></script>
 <script th:inline="none">
 
-    /* //监听批量导入
-     layui.use('upload', function() {
-         var $ = layui.jquery
-             , upload = layui.upload;
-         upload.render({ //允许上传的文件后缀
-             elem: '#ImportExcel'
-             , url: '/ImportExcel' //改成您自己的上传接口
-             , accept: 'file' //普通文件
-             ,processData: false //因为data值是FormData对象，不需要对数据做处理。
-             ,contentType: false
-             ,type:'POST'
-             , done: function (res) {
-                 layer.msg('上传成功');
-                 console.log(res)
-                 location.reload();
-             }
-         });
-     })*/
-
     layui.use(['form', 'table'], function () {
         var $ = layui.jquery,
             form = layui.form,
@@ -130,52 +111,6 @@
 
         });
 
-        /* // 监听搜索操作
-         form.on('submit(data-search-btn)', function () {
-             // 搜索条件
-             var examinerName = $('#examinerName').val();
-             var subjectName = $('#subjectName').val();
-             var examType = $('#examType').val();
-             var idCard = $('#idCard').val();
-             var district = $('#district').val();
-             //执行搜索重载
-             table.reload('currentTableId', {
-                 url:"/LikeExaminer",
-                 page: {
-                     curr: 1
-                 }
-                 , where: {
-                     'examinerName': $.trim(examinerName),
-                     'subjectName': $.trim(subjectName),
-                     'examType': $.trim(examType),
-                     'idCard': $.trim(idCard),
-                     'district': $.trim(district),
-                 }
-             });
-             return false;
-         });
-
-         //监听导出操作
-         $(".easy-expor-btn").on("click", function () {
-             layer.confirm('确定导出Excel',function(index){
-                 $.ajax({
-                     type: "post",
-                     url: '/ExporExcel',
-                 });
-                 layer.close(index);
-                 layer.msg('导出成功');
-                 table.reload('currentTableId',{
-                     url:'/viewExaminer',
-                     where: { //设定异步数据接口的额外参数，任意设
-                     },
-                     page: {
-                         curr: 1 //重新从第 1 页开始
-                     }
-                 });
-             })
-
-         });*/
-
         // 监听删除操作
         $(".data-delete-btn").on("click", function () {
             var checkStatus = table.checkStatus('currentTableId')
@@ -187,13 +122,13 @@
                     if (index) {
                         var checkStatus = table.checkStatus('currentTableId'),
                             data = checkStatus.data;
-                        var id = [];
+                        var ids = [];
                         if (data.length > 0) {
                             for (var i = 0; i < data.length; i++) {
-                                id += data[i].id + ',';
+                                ids += data[i].id + ',';
                             }
                             console.log(id);
-                            var ids = $('input:hidden').val();
+                            var id = $('input:hidden').val();
                             $.ajax({
                                 type: "post",
                                 url: '/deleteAllViewExaminer',
@@ -210,8 +145,7 @@
                                     curr: 1 //重新从第 1 页开始
                                 }
                             });
-                        }
-                        ;
+                        };
                     } else {
                         layer.close(index);
                     }
@@ -234,10 +168,10 @@
                         $.ajax({
                             type:"post",
                             url:"/deleteViewExaminer",
-                            data:{"id":data.id,"ids":ids},
+                            data:{"id":id,"ids":data.id},
                             success:function (data) {
                                 obj.del();
-                                layer.alert('操作成功');
+                                layer.alert('操作成功'+id);
                             }
                         });
                     }else {

@@ -57,6 +57,6 @@ public class StudySubjectServiceImpl implements StudySubjectService {
 
     @Override
     public Page<DictStudySubject> findAll(Specification<DictStudySubject> sts, Pageable pageable) {
-        return studySubjectRepository.findAll(pageable);
+        return studySubjectRepository.findAll(sts,pageable);
     }
 }

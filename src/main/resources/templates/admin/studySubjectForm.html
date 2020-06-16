@@ -10,24 +10,24 @@
     <link rel="stylesheet" href="/lib/layui-v2.5.4/css/layui.css" media="all">
 </head>
 <body>
-<input type="hidden" th:value="${batch.id}" name="id">
+<input type="hidden" th:value="${studySubject.id}" name="id">
 <div class="layui-form" lay-filter="layuiadmin-form-useradmin" id="layuiadmin-form-useradmin" style="padding: 20px 0 0 0;">
     <div class="layui-form-item">
-        <label class="layui-form-label">面试科目名</label>
+        <label class="layui-form-label">科目名</label>
         <div class="layui-input-inline">
-            <input type="text" name="subjectName" placeholder="面试科目名" autocomplete="off" class="layui-input">
+            <input type="text" th:value="${studySubject.subjectName}" name="subjectName" placeholder="面试科目名" autocomplete="off" class="layui-input">
         </div>
     </div>
     <div class="layui-form-item">
-        <label class="layui-form-label">面试科目代码</label>
+        <label class="layui-form-label">科目代码</label>
         <div class="layui-input-inline">
-            <input type="text" name="subjectCode" placeholder="面试科目代码" autocomplete="off" class="layui-input">
+            <input type="text" th:value="${studySubject.subjectCode}" name="subjectCode" placeholder="面试科目代码" autocomplete="off" class="layui-input">
         </div>
     </div>
     <div class="layui-form-item">
-        <label class="layui-form-label">面试科目排序码</label>
+        <label class="layui-form-label">科目排序码</label>
         <div class="layui-input-inline">
-            <input type="text" name="subjectSortCode" placeholder="面试科目排序码" autocomplete="off" class="layui-input">
+            <input type="text" th:value="${studySubject.subjectSortCode}" name="subjectSortCode" placeholder="面试科目排序码" autocomplete="off" class="layui-input">
         </div>
     </div>
     <div class="layui-form-item">

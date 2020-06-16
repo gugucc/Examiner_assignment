@@ -136,7 +136,6 @@
                         }
                         console.log(id);
                         $.ajax({
-                            type:'post',
                             url: '/deleteAllEvaluateItem',
                             data:{'id': id},
                         });
@@ -194,7 +193,6 @@
                 layer.confirm('真的删除行么', function (index) {
                     if (index){
                         $.ajax({
-                            type:'post',
                             url:"/deleteEvaluateItem",
                             data:{'id': data.id},
                             success:function (data) {

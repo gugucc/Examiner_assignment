@@ -43,19 +43,18 @@
                                 <input type="text" id="examType" name="examType" autocomplete="off" class="layui-input">
                             </div>
                         </div>
-                        <div class="layui-inline">
+                       <!-- <div class="layui-inline">
                             <label class="layui-form-label">开始时间</label>
                             <div class="layui-input-inline">
                                 <input type="text" id="starTime" name="starTime" placeholder="yyyy-MM-dd HH:mm:ss" class="layui-input">
                             </div>
                         </div>
-
                         <div class="layui-inline">
                             <label class="layui-form-label">结束时间</label>
                             <div class="layui-input-inline">
                                 <input type="text" class="layui-input" id="endTime" name="endTime" placeholder="yyyy-MM-dd HH:mm:ss">
                             </div>
-                        </div>
+                        </div>-->
                         <div class="layui-inline">
                             <a class="layui-btn" lay-submit="" lay-filter="data-search-btn">搜索</a>
                         </div>
@@ -157,8 +156,11 @@
             // 搜索条件
             var examName = $('#examName').val();
             var examCode = $('#examCode').val();
-            var starTime = $('#starTime').val();
-            var endTime = $('#endTime').val();
+            var studySubject = $('#studySubject').val();
+            var examType = $('#examType').val();
+            /*var starTime = $('#starTime').val();
+            var endTime = $('#endTime').val();*/
+            var examSiteName = $('#examSiteName').val();
             //执行搜索重载
             table.reload('currentTableId', {
                 url:"/LikeExam",
@@ -168,8 +170,11 @@
                 , where: {
                     'examName': $.trim(examName),
                     'examCode': $.trim(examCode),
-                    'starTime': $.trim(starTime),
-                    'endTime': $.trim(endTime),
+                    'studySubject': $.trim(studySubject),
+                    'examType': $.trim(examType),
+                    /*'starTime': $.trim(starTime),
+                    'endTime': $.trim(endTime),*/
+                    'examSiteName': $.trim(examSiteName),
                 }
             });
 

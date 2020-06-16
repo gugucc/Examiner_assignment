@@ -62,8 +62,10 @@
         <script type="text/html" id="currentTableBar">
             {{#  if(d.examId == '0'){ }}
             <a class="layui-btn layui-btn-xs  layui-btn-danger data-count-delete" lay-event="delete">无法出席</a>
-            {{#  } else if(d.examId == '' || d.examId == 'null') { }}
-            <a class="layui-btn  layui-btn-xs data-count-edit" lay-event="edit">还未分配</a>
+            {{#  } else if(d.examId == '') { }}
+            <a class="layui-btn  layui-btn-xs layui-btn-danger" lay-event="edit">还未分配</a>
+            {{#  } else if(d.examId == null) { }}
+            <a class="layui-btn  layui-btn-xs layui-btn-danger" lay-event="edit">还未分配</a>
             {{#  } else { }}
             <a class="layui-btn  layui-btn-xs data-count-edit" lay-event="edit">确认出席</a>
             {{#  } }}

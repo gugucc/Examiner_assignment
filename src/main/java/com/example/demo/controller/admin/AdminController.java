@@ -359,7 +359,7 @@ public class AdminController {
     public ModelAndView toEditExamType(Long id, Model model) {
         System.out.println(id);
         DictExamType dictExamType = examTypeService.findById(id);
-        model.addAttribute("DictExamType", dictExamType);
+        model.addAttribute("dictExamType", dictExamType);
         return new ModelAndView("admin/examTypeForm.html", "model", model);
     }
 
@@ -451,7 +451,7 @@ public class AdminController {
             @Override
             public Predicate toPredicate(Root<DictExamType> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder cb) {
                 List<Predicate> list = new ArrayList<>();
-                //根据dptName 模糊查询Department
+                //根据typeName 模糊查询ExamType
                 if (StringUtils.isNotBlank(dictExamType.getTypeName())) {
                     list.add(cb.like(root.get("typeName").as(String.class), "%" + dictExamType.getTypeName() + "%"));
                 }
@@ -583,7 +583,6 @@ public class AdminController {
             @Override
             public Predicate toPredicate(Root<DictStudySubject> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder cb) {
                 List<Predicate> list = new ArrayList<>();
-                //根据dptName 模糊查询Department
                 if (StringUtils.isNotBlank(studySubject.getSubjectName())) {
                     list.add(cb.like(root.get("subjectName").as(String.class), "%" + studySubject.getSubjectName() + "%"));
                 }
@@ -616,7 +615,7 @@ public class AdminController {
 
     //修改评价选项
     @GetMapping("/editEvaluateItem")
-    public ModelAndView toeditEvaluateItem(Long id, Model model) {
+    public ModelAndView toEditEvaluateItem(Long id, Model model) {
 
         EvaluateItem evaluateItem = evaluateItemService.findById(id);
         model.addAttribute("evaluateItem", evaluateItem);
@@ -762,8 +761,6 @@ public class AdminController {
     @PostMapping("/editDistrict")
     @ResponseBody
     public String editDistrict(DictDistrict district) {
-
-
         DictDistrict districtNew = districtService.findById(district.getId());
         districtNew.setDistrictName(district.getDistrictName());
         districtNew.setDistrictCode(district.getDistrictCode());
@@ -979,13 +976,6 @@ public class AdminController {
             @Override
             public Predicate toPredicate(Root<ExamSite> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder cb) {
                 List<Predicate> list = new ArrayList<>();
-                //根据dptName 模糊查询ExamSite
-                if (StringUtils.isNotBlank(examSite.getExamSiteName())) {
-                    list.add(cb.like(root.get("examSite_name").as(String.class), "%" + examSite.getExamSiteName() + "%"));
-                }
-                if (StringUtils.isNotBlank(examSite.getPrincipal())) {
-                    list.add(cb.like(root.get("principal").as(String.class), "%" + examSite.getPrincipal() + "%"));
-                }
                 if (StringUtils.isNotBlank(examSite.getDistrict())) {
                     list.add(cb.like(root.get("district").as(String.class), "%" + examSite.getDistrict() + "%"));
                 }
@@ -1171,7 +1161,19 @@ public class AdminController {
                 List<Predicate> list = new ArrayList<>();
                 //根据dptName 模糊查询Department
                 if (StringUtils.isNotBlank(exam.getExamName())) {
-                    list.add(cb.like(root.get("courseName").as(String.class), "%" + exam.getExamName() + "%"));
+                    list.add(cb.like(root.get("examName").as(String.class), "%" + exam.getExamName() + "%"));
+                }
+                if (StringUtils.isNotBlank(exam.getExamCode())) {
+                    list.add(cb.like(root.get("examCode").as(String.class), "%" + exam.getExamCode() + "%"));
+                }
+                if (StringUtils.isNotBlank(exam.getStudySubject())) {
+                    list.add(cb.like(root.get("studySubject").as(String.class), "%" + exam.getStudySubject() + "%"));
+                }
+                if (StringUtils.isNotBlank(exam.getExamType())) {
+                    list.add(cb.like(root.get("examType").as(String.class), "%" + exam.getExamType() + "%"));
+                }
+                if (StringUtils.isNotBlank(exam.getExamSiteName())) {
+                    list.add(cb.like(root.get("ExamSiteName").as(String.class), "%" + exam.getExamSiteName() + "%"));
                 }
                 Predicate[] pre = new Predicate[list.size()];
                 criteriaQuery.where(list.toArray(pre));
@@ -1179,6 +1181,9 @@ public class AdminController {
             }
         }, pageable).getContent();
         Map<String, Object> map = new HashMap<>();
+        for (Exam s:content){
+            s.setExamSiteName(s.getExamSite().getExamSiteName());
+        }
         map.put("data", content);
         map.put("size", examService.findAllCount());
         return map;
@@ -1372,7 +1377,7 @@ public class AdminController {
         System.out.println("=====" + LString);
         // 调用service层的批量删除函数
         int i = examinerService.deleteAllViewExaminer("缺席",LString);
-        examService.updateState(2, id);//state:2表示分配了考官 ，但有的来不到
+        examService.updateState(2, id);//state:2表示分配了考官 ，但有的来不到（缺席）
         return i;
     }
 

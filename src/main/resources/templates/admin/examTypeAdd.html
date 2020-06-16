@@ -53,7 +53,7 @@
             }else {
                 $.ajax({
                     type:"post",
-                    url:"/addClass",
+                    url:"/addExamType",
                     data:{"typeName":typeName,"typeCode":typeCode,"id":id,"typeSortCode":typeSortCode},
                     success:function (data) {
                         if (data == "ok") {
